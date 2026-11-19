@@ -37,7 +37,7 @@ function speichereFortschritt() {
 let fortschritt = ladeFortschritt();
 
 // Auswahl: Lernform (Karteikarten / Multiple Choice) und Inhalt (Theorie / Rechnen)
-let filter = { form: 'alle', art: 'alle' };
+let filter = { form: 'alle', art: 'alle', eingabe: 'an' };
 try { filter = Object.assign(filter, JSON.parse(localStorage.getItem(FILTER_KEY)) || {}); } catch (e) { /* egal */ }
 function speichereFilter() { try { localStorage.setItem(FILTER_KEY, JSON.stringify(filter)); } catch (e) { /* egal */ } }
 
@@ -62,6 +62,71 @@ function esc(s) {
     .replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]))
     .replace(/\n/g, '<br>');
 }
+// Für Textfelder: escapen ohne Zeilenumbrüche in <br> zu verwandeln
+function escText(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+// ---- Eigene Antwort prüfen (Schlüsselbegriffe) ------------------------
+const STOPPWOERTER = new Set(('aber alle allem allen aller alles also andere anderen anderer anderes auch auf aus bei beim bzw dabei damit dann darf dass dadurch daher dem den denen der des dessen die dies diese diesem diesen dieser dieses doch durch eine einem einen einer eines etwa gegen hier ihre ihren immer jede jedem jeden jeder jedes kann keine keinen mehr muss nach nicht noch nur oder ohne sehr sich sind sobald soll sowie ueber unter usw viel vom von vor wenn werden wird weil welche welcher welches wie zum zur zwischen haben hat ist sein seine seiner bleibt gibt beispiel beispiele also etwa wieder werden wurde jeweils sowie insbesondere ebenso z.b entsteht entstehen wenig weniger selbst schafft schaffen ueberlassen bleiben sollen sollte laesst lassen machen macht liegt liegen kommt kommen gehen geht stehen steht werden zuerst danach dafuer davon darf duerfen koennen moeglich moeglichst gleich gleiche ganze ganzen einzelne einzelnen bestimmte bestimmten genau grossen kleine kleinen hohe hoher hohen').split(' '));
+function normal(s) {
+  return s.toLowerCase().replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss');
+}
+function zerlege(s) {
+  return s.split(/[^A-Za-zÄÖÜäöüß0-9.,]+/)
+    .map(w => w.replace(/^[.,]+|[.,]+$/g, ''))
+    .filter(Boolean)
+    .map(w => /^\d/.test(w) ? { roh: w, n: w.replace(/\.(?=\d{3}\b)/g, '') } : { roh: w, n: normal(w) });
+}
+function schluesselbegriffe(antwort) {
+  const gesehen = new Map();
+  for (const { roh, n } of zerlege(antwort)) {
+    const zahl = /^\d/.test(n);
+    if (zahl ? n.replace(/\D/g, '').length < 2 : (n.length < 5 || STOPPWOERTER.has(n))) continue;
+    const stamm = zahl ? n : n.slice(0, 6);
+    if (!gesehen.has(stamm)) gesehen.set(stamm, { stamm, wort: roh, n });
+  }
+  return [...gesehen.values()];
+}
+function pruefeAntwort(eingabe, antwort) {
+  const begriffe = schluesselbegriffe(antwort);
+  const meine = zerlege(eingabe).map(w => w.n);
+  const treffer = begriffe.map(b => Object.assign({}, b, {
+    ok: /^\d/.test(b.stamm)
+      ? meine.includes(b.n)
+      : meine.some(w => w.startsWith(b.stamm) || (w.length >= 5 && b.n.includes(w))),
+  }));
+  const gefunden = treffer.filter(t => t.ok).length;
+  const prozent = treffer.length ? Math.round(gefunden / treffer.length * 100) : 0;
+  const stufe = prozent >= 40 ? 'gut' : prozent >= 20 ? 'mittel' : 'schwach';
+  const titel = { gut: '👍 Sieht gut aus', mittel: '🤏 Teilweise richtig', schwach: '✗ Da fehlt noch viel' }[stufe];
+  return { treffer, gefunden, gesamt: treffer.length, prozent, stufe, titel, vorschlag: stufe === 'gut' };
+}
+
+// ---- Spracheingabe (falls der Browser sie unterstützt) ----------------
+const Sprache = (() => {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  let rec = null;
+  function stopp() { if (rec) rec.stop(); }
+  function umschalten(feld, knopf) {
+    if (rec) return stopp();
+    rec = new SR();
+    rec.lang = 'de-DE'; rec.continuous = true; rec.interimResults = true;
+    const basis = feld.value.trim();
+    rec.onresult = e => {
+      let t = '';
+      for (let i = 0; i < e.results.length; i++) t += e.results[i][0].transcript + ' ';
+      feld.value = (basis ? basis + ' ' : '') + t.trim();
+      if (sitzung) sitzung.eingabe = feld.value;
+    };
+    rec.onerror = e => { if (e.error === 'not-allowed' || e.error === 'service-not-allowed') alert('Bitte erlaube der Seite den Zugriff aufs Mikrofon – oder nutze das 🎤 auf deiner Tastatur.'); };
+    rec.onend = () => { rec = null; knopf.textContent = '🎤 Sprechen'; knopf.classList.remove('aktiv'); };
+    try { rec.start(); knopf.textContent = '⏹ Stopp'; knopf.classList.add('aktiv'); }
+    catch (e) { rec = null; }
+  }
+  return { verfuegbar: !!SR, umschalten, stopp };
+})();
+
 function mische(arr) {
   const a = arr.slice();
   for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
@@ -109,6 +174,9 @@ function filterLeiste() {
     </div>
     <div class="segmente" role="group" aria-label="Inhalt">
       ${seg('art', 'theorie', '📖 Theorie')}${seg('art', 'rechnen', '🧮 Rechnen')}${seg('art', 'alle', 'Beides')}
+    </div>
+    <div class="segmente zwei" role="group" aria-label="Karteikarten selbst beantworten">
+      ${seg('eingabe', 'an', '✍️ Erst selbst antworten')}${seg('eingabe', 'aus', '👀 Nur aufdecken')}
     </div>
   </div>`;
 }
@@ -258,14 +326,31 @@ function zeigeKarte() {
     }).join('')}</div>
     ${beantwortet ? `${f.erklaerung ? `<div class="antwort">${esc(f.erklaerung)}</div>` : ''}
       <button class="primaer breit" data-aktion="weiter">Weiter</button>` : ''}`;
+  } else if (s.aufgedeckt) {
+    const p = s.pruefung;
+    const ergebnis = p ? `<div class="pruefergebnis ${p.stufe}">
+        <strong>${p.titel}</strong> – ${p.gefunden} von ${p.gesamt} Schlüsselbegriffen (${p.prozent} %)
+        <div class="chips">${p.treffer.map(t => `<span class="chip ${t.ok ? 'ok' : 'fehlt'}">${t.ok ? '✓' : '✗'} ${escText(t.wort)}</span>`).join('')}</div>
+        <details><summary>Deine Antwort</summary><p>${esc(s.eingabe)}</p></details>
+      </div>` : '';
+    const vorschlagJa = p && p.vorschlag, vorschlagNein = p && !p.vorschlag;
+    inhalt = `${ergebnis}
+      <div class="antwort"><strong>Musterlösung</strong><br>${esc(f.antwort)}</div>
+      ${p ? '<p class="stats klein">Die Prüfung vergleicht nur Schlüsselbegriffe – entscheide am Ende selbst ehrlich.</p>' : ''}
+      <div class="bewertung">
+        <button class="nein ${vorschlagNein ? 'vorschlag' : ''}" data-aktion="bewerte" data-gewusst="0">Nicht gewusst</button>
+        <button class="ja ${vorschlagJa ? 'vorschlag' : ''}" data-aktion="bewerte" data-gewusst="1">Gewusst</button>
+      </div>`;
+  } else if (filter.eingabe === 'an') {
+    inhalt = `<textarea id="eingabe" class="eingabe" rows="5" placeholder="Deine Antwort … (tippen${Sprache.verfuegbar ? ' oder 🎤 sprechen' : ''})">${escText(s.eingabe || '')}</textarea>
+      <div class="eingabe-knoepfe">
+        ${Sprache.verfuegbar ? '<button data-aktion="sprechen" id="mic">🎤 Sprechen</button>' : ''}
+        <button class="primaer" data-aktion="pruefen">Antwort prüfen</button>
+      </div>
+      ${Sprache.verfuegbar ? '' : '<p class="stats klein">Tipp: Zum Sprechen das 🎤 auf deiner Tastatur antippen.</p>'}
+      <p><button class="link-neutral" data-aktion="aufdecken">Weiß ich nicht – Lösung zeigen</button></p>`;
   } else {
-    inhalt = s.aufgedeckt
-      ? `<div class="antwort">${esc(f.antwort)}</div>
-         <div class="bewertung">
-           <button class="nein" data-aktion="bewerte" data-gewusst="0">Nicht gewusst</button>
-           <button class="ja" data-aktion="bewerte" data-gewusst="1">Gewusst</button>
-         </div>`
-      : `<button class="primaer breit" data-aktion="aufdecken">${artVon(f) === 'rechnen' ? 'Lösungsweg zeigen' : 'Antwort zeigen'}</button>`;
+    inhalt = `<button class="primaer breit" data-aktion="aufdecken">${artVon(f) === 'rechnen' ? 'Lösungsweg zeigen' : 'Antwort zeigen'}</button>`;
   }
   const marken = [
     artVon(f) === 'rechnen' ? '<span class="badge rechnen">🧮 Rechnen</span>' : '',
@@ -300,7 +385,7 @@ function naechste(gewusst) {
       s.warteschlange.splice(stelle, 0, id);
     }
   }
-  s.pos++; s.aufgedeckt = false; s.gewaehlt = null; s.optionen = null;
+  s.pos++; s.aufgedeckt = false; s.gewaehlt = null; s.optionen = null; s.eingabe = ''; s.pruefung = null;
   zeigeKarte();
 }
 
@@ -373,6 +458,10 @@ document.addEventListener('submit', async e => {
   zeigeKonto();
 });
 
+document.addEventListener('input', e => {
+  if (e.target.id === 'eingabe' && sitzung) sitzung.eingabe = e.target.value;
+});
+
 // ---- Klicks -----------------------------------------------------------
 document.addEventListener('click', e => {
   const b = e.target.closest('[data-aktion]');
@@ -394,7 +483,20 @@ document.addEventListener('click', e => {
       starteSitzung(liste, p ? zeigeStart : () => zeigeFach(d.fach));
       break;
     }
-    case 'aufdecken': sitzung.aufgedeckt = true; zeigeKarte(); break;
+    case 'aufdecken': Sprache.stopp(); sitzung.pruefung = null; sitzung.aufgedeckt = true; zeigeKarte(); break;
+    case 'sprechen': Sprache.umschalten(document.getElementById('eingabe'), b); break;
+    case 'pruefen': {
+      Sprache.stopp();
+      const feld = document.getElementById('eingabe');
+      const text = (feld ? feld.value : '').trim();
+      if (!text) { if (feld) { feld.focus(); feld.placeholder = 'Schreib oder sprich zuerst deine Antwort …'; } break; }
+      const f = FRAGEN.find(x => x.id === sitzung.warteschlange[sitzung.pos]);
+      sitzung.eingabe = text;
+      sitzung.pruefung = pruefeAntwort(text, f.antwort);
+      sitzung.aufgedeckt = true;
+      zeigeKarte();
+      break;
+    }
     case 'bewerte': naechste(d.gewusst === '1'); break;
     case 'waehle':
       sitzung.gewaehlt = Number(d.i);

@@ -26,6 +26,21 @@ input { width: 100%; font: inherit; color: inherit; padding: 12px 14px; border-r
 .seg { border: 0; border-radius: 0; padding: 10px 6px; font-size: .9rem; background: var(--flaeche); }
 .seg + .seg { border-left: 1px solid var(--rand); }
 .seg.aktiv { background: var(--akzent); color: var(--akzent-text); font-weight: 600; }
+.segmente.zwei { grid-template-columns: 1fr 1fr; }
+.eingabe { width: 100%; font: inherit; color: inherit; padding: 12px 14px; border-radius: 10px; border: 1px solid var(--rand); background: var(--bg); resize: vertical; }
+.eingabe-knoepfe { display: flex; gap: 10px; margin-top: 10px; }
+.eingabe-knoepfe button { flex: 1; }
+#mic.aktiv { background: var(--schlecht-bg); border-color: var(--schlecht); color: var(--schlecht); font-weight: 600; }
+.pruefergebnis { padding: 12px 14px; border-radius: 10px; margin-bottom: 12px; border: 1px solid var(--rand); }
+.pruefergebnis.gut { background: var(--gut-bg); border-color: var(--gut); }
+.pruefergebnis.mittel { background: var(--badge); border-color: var(--badge-text); }
+.pruefergebnis.schwach { background: var(--schlecht-bg); border-color: var(--schlecht); }
+.pruefergebnis details { margin-top: 8px; font-size: .9rem; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.chip { font-size: .8rem; padding: 2px 8px; border-radius: 999px; background: var(--flaeche); border: 1px solid var(--rand); }
+.chip.ok { color: var(--gut); border-color: var(--gut); }
+.chip.fehlt { color: var(--schlecht); border-color: var(--schlecht); }
+.bewertung .vorschlag { box-shadow: 0 0 0 3px var(--akzent); }
 .knoepfe { margin-top: 14px; }
 .knoepfe.oben { margin-top: 12px; }
 .stats.klein { font-size: .85rem; margin-top: -8px; }
