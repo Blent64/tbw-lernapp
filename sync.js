@@ -117,6 +117,25 @@ const Sync = (() => {
   }
   async function abmelden() { await client.auth.signOut(); }
 
+  // KI-Bewertung über die Edge Function "bewerten" (Gemini). null = nicht verfügbar → Begriffsprüfung
+  let kiAus = false;
+  async function kiBewerten(frage, musterloesung, antwort) {
+    if (!aktiv || !nutzer || kiAus) return null;
+    try {
+      const ablauf = new Promise(r => setTimeout(() => r({ error: { message: 'Zeitüberschreitung' } }), 20000));
+      const { data, error } = await Promise.race([
+        client.functions.invoke('bewerten', { body: { frage, musterloesung, antwort } }),
+        ablauf,
+      ]);
+      if (error) {
+        const status = error.context && error.context.status;
+        if (status === 404 || status === 500) kiAus = true; // nicht eingerichtet → in dieser Sitzung nicht mehr versuchen
+        return null;
+      }
+      return data && typeof data.punkte === 'number' ? data : null;
+    } catch (e) { return null; }
+  }
+
   if (aktiv) {
     client.auth.onAuthStateChange((event, session) => {
       const vorher = nutzer;
@@ -139,7 +158,7 @@ const Sync = (() => {
     get nutzer() { return nutzer; },
     get status() { return status; },
     get ranglisteEintrag() { return eintrag; },
-    start, planeUpload, abgleichen, anmelden, registrieren, abmelden, aktualisiereKopf,
+    start, planeUpload, abgleichen, anmelden, registrieren, abmelden, aktualisiereKopf, kiBewerten,
     ladeEintrag, ranglisteSpeichern, ranglisteVerlassen, ranglisteLaden,
   };
 })();

@@ -335,15 +335,26 @@ function zeigeKarte() {
       <button class="primaer breit" data-aktion="weiter">Weiter</button>` : ''}`;
   } else if (s.aufgedeckt) {
     const p = s.pruefung;
-    const ergebnis = p ? `<div class="pruefergebnis ${p.stufe}">
+    const k = s.ki;
+    const liste = (titel, a) => a && a.length ? `<p class="ki-liste"><strong>${titel}</strong><br>${a.map(x => '• ' + escText(x)).join('<br>')}</p>` : '';
+    const ergebnis = s.kiLaeuft ? `<div class="pruefergebnis">🤖 Die KI prüft deine Antwort …</div>`
+      : k ? `<div class="pruefergebnis ${k.urteil === 'richtig' ? 'gut' : k.urteil === 'teilweise' ? 'mittel' : 'schwach'}">
+        <strong>🤖 ${k.urteil === 'richtig' ? '👍 Richtig' : k.urteil === 'teilweise' ? '🤏 Teilweise richtig' : '✗ Noch nicht richtig'}</strong> – ${k.punkte} von 100 Punkten
+        <p>${escText(k.feedback)}</p>
+        ${liste('Es fehlt:', k.fehlt)}${liste('Nicht korrekt:', k.falsch)}
+        <details><summary>Deine Antwort</summary><p>${esc(s.eingabe)}</p></details>
+      </div>`
+      : p ? `<div class="pruefergebnis ${p.stufe}">
         <strong>${p.titel}</strong> – ${p.gefunden} von ${p.gesamt} Schlüsselbegriffen (${p.prozent} %)
         <div class="chips">${p.treffer.map(t => `<span class="chip ${t.ok ? 'ok' : 'fehlt'}">${t.ok ? '✓' : '✗'} ${escText(t.wort)}</span>`).join('')}</div>
         <details><summary>Deine Antwort</summary><p>${esc(s.eingabe)}</p></details>
       </div>` : '';
-    const vorschlagJa = p && p.vorschlag, vorschlagNein = p && !p.vorschlag;
+    const gut = k ? k.urteil === 'richtig' : p && p.vorschlag;
+    const vorschlagJa = (k || p) && gut, vorschlagNein = (k || p) && !gut;
     inhalt = `${ergebnis}
       <div class="antwort"><strong>Musterlösung</strong><br>${esc(f.antwort)}</div>
-      ${p ? '<p class="stats klein">Die Prüfung vergleicht nur Schlüsselbegriffe – entscheide am Ende selbst ehrlich.</p>' : ''}
+      ${k ? '<p class="stats klein">Bewertet von KI (Google Gemini) – sie kann sich irren. Entscheide am Ende selbst.</p>'
+        : p ? '<p class="stats klein">Die Prüfung vergleicht nur Schlüsselbegriffe – entscheide am Ende selbst ehrlich.</p>' : ''}
       <div class="bewertung">
         <button class="nein ${vorschlagNein ? 'vorschlag' : ''}" data-aktion="bewerte" data-gewusst="0">Nicht gewusst</button>
         <button class="ja ${vorschlagJa ? 'vorschlag' : ''}" data-aktion="bewerte" data-gewusst="1">Gewusst</button>
@@ -392,7 +403,7 @@ function naechste(gewusst) {
       s.warteschlange.splice(stelle, 0, id);
     }
   }
-  s.pos++; s.aufgedeckt = false; s.gewaehlt = null; s.optionen = null; s.eingabe = ''; s.pruefung = null;
+  s.pos++; s.aufgedeckt = false; s.gewaehlt = null; s.optionen = null; s.eingabe = ''; s.pruefung = null; s.ki = null; s.kiLaeuft = false;
   zeigeKarte();
 }
 
@@ -497,11 +508,23 @@ document.addEventListener('click', e => {
       const feld = document.getElementById('eingabe');
       const text = (feld ? feld.value : '').trim();
       if (!text) { if (feld) { feld.focus(); feld.placeholder = 'Schreib oder sprich zuerst deine Antwort …'; } break; }
-      const f = FRAGEN.find(x => x.id === sitzung.warteschlange[sitzung.pos]);
-      sitzung.eingabe = text;
-      sitzung.pruefung = pruefeAntwort(text, f.antwort);
-      sitzung.aufgedeckt = true;
+      const s = sitzung;
+      const id = s.warteschlange[s.pos];
+      const f = FRAGEN.find(x => x.id === id);
+      s.eingabe = text;
+      s.pruefung = pruefeAntwort(text, f.antwort);
+      s.ki = null;
+      s.aufgedeckt = true;
+      s.kiLaeuft = !!Sync.nutzer;
       zeigeKarte();
+      if (s.kiLaeuft) {
+        Sync.kiBewerten(f.frage, f.antwort, text).then(ergebnis => {
+          // Nur anzeigen, wenn noch dieselbe Karte offen ist
+          if (sitzung !== s || s.warteschlange[s.pos] !== id || !s.aufgedeckt) return;
+          s.kiLaeuft = false; s.ki = ergebnis;
+          const y = window.scrollY; zeigeKarte(); window.scrollTo(0, y);
+        });
+      }
       break;
     }
     case 'bewerte': naechste(d.gewusst === '1'); break;

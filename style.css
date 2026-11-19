@@ -35,6 +35,8 @@ input { width: 100%; font: inherit; color: inherit; padding: 12px 14px; border-r
 .pruefergebnis.gut { background: var(--gut-bg); border-color: var(--gut); }
 .pruefergebnis.mittel { background: var(--badge); border-color: var(--badge-text); }
 .pruefergebnis.schwach { background: var(--schlecht-bg); border-color: var(--schlecht); }
+.pruefergebnis p { margin: 6px 0; }
+.ki-liste { font-size: .9rem; }
 .pruefergebnis details { margin-top: 8px; font-size: .9rem; }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
 .chip { font-size: .8rem; padding: 2px 8px; border-radius: 999px; background: var(--flaeche); border: 1px solid var(--rand); }
