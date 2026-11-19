@@ -1,7 +1,9 @@
 // Alle Lernfragen der App.
 // typ: 'karte' = Karteikarte (Frage/Antwort), 'mc' = Quiz mit Antwortmöglichkeiten
 // richtig = Position der richtigen Antwort in "optionen" (0 = erste)
+// art: 'rechnen' = Rechenaufgabe (ohne Angabe: Theorie)
 // quelle: 'beispiel' = von Claude erstellte Beispielfrage, bitte inhaltlich prüfen
+// quelle: 'claude' = Übungsaufgabe von Claude (nicht aus dem Skript)
 const FRAGEN = [
   // Volkswirtschaftslehre: siehe fragen-vwl.js (aus den Lehrgangsskripten)
 
@@ -14,7 +16,7 @@ const FRAGEN = [
     optionen: ['Verkaufspreis − variable Stückkosten', 'Verkaufspreis − Fixkosten', 'Umsatz − Gesamtkosten', 'Variable Kosten + Fixkosten'],
     richtig: 0,
     erklaerung: 'Der Stückdeckungsbeitrag zeigt, wie viel jedes verkaufte Stück zur Deckung der Fixkosten beiträgt.' },
-  { id: 'rewe-003', fach: 'rewe', thema: 'Teilkostenrechnung', typ: 'karte', quelle: 'beispiel',
+  { id: 'rewe-003', fach: 'rewe', thema: 'Teilkostenrechnung', typ: 'karte', art: 'rechnen', quelle: 'beispiel',
     frage: 'Fixkosten 60.000 €, Verkaufspreis 50 €/Stück, variable Kosten 30 €/Stück. Wo liegt die Gewinnschwelle (Break-even)?',
     antwort: 'Break-even-Menge = Fixkosten ÷ Stückdeckungsbeitrag\nStückdeckungsbeitrag = 50 € − 30 € = 20 €\n60.000 € ÷ 20 € = 3.000 Stück' },
   { id: 'rewe-004', fach: 'rewe', thema: 'Abgrenzungsrechnung', typ: 'mc', quelle: 'beispiel',

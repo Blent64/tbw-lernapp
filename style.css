@@ -19,6 +19,23 @@ body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.5 syst
 .konto { padding: 4px 12px; border-radius: 999px; border: 1px solid var(--akzent-text); background: none; color: var(--akzent-text); font-size: .9rem; }
 .konto[hidden] { display: none; }
 input { width: 100%; font: inherit; color: inherit; padding: 12px 14px; border-radius: 10px; border: 1px solid var(--rand); background: var(--flaeche); }
+.kopf-rechts { display: flex; gap: 8px; }
+.abschnitt { font-size: 1.05rem; margin: 0 0 10px; }
+.filter { display: grid; gap: 8px; }
+.segmente { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border: 1px solid var(--rand); border-radius: 10px; overflow: hidden; }
+.seg { border: 0; border-radius: 0; padding: 10px 6px; font-size: .9rem; background: var(--flaeche); }
+.seg + .seg { border-left: 1px solid var(--rand); }
+.seg.aktiv { background: var(--akzent); color: var(--akzent-text); font-weight: 600; }
+.knoepfe { margin-top: 14px; }
+.knoepfe.oben { margin-top: 12px; }
+.stats.klein { font-size: .85rem; margin-top: -8px; }
+.badge.rechnen { background: var(--gut-bg); color: var(--gut); }
+.tabelle-rahmen { overflow-x: auto; margin: 12px 0; }
+.rangliste { width: 100%; border-collapse: collapse; background: var(--flaeche); border: 1px solid var(--rand); border-radius: 10px; overflow: hidden; }
+.rangliste th, .rangliste td { padding: 10px 8px; text-align: left; border-bottom: 1px solid var(--rand); }
+.rangliste th { font-size: .8rem; color: var(--leise); font-weight: 600; }
+.rangliste td:nth-child(n+3), .rangliste th:nth-child(n+3) { text-align: right; }
+.rangliste tr.ich td { background: var(--gut-bg); font-weight: 600; }
 .formular { display: grid; gap: 10px; }
 .formular .breit { margin-top: 2px; }
 .meldung { padding: 10px 14px; border-radius: 8px; background: var(--schlecht-bg); color: var(--schlecht); }

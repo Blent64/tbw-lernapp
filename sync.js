@@ -11,6 +11,7 @@ const Sync = (() => {
   let timer = null;
   let laeuft = false;
   let bereit = false;
+  let eintrag; // Rangliste: undefined = unbekannt, null = nicht dabei, { name } = dabei
 
   // Wird am Ende von app.js aufgerufen, wenn Fortschritt und Ansichten existieren
   function start() {
@@ -37,10 +38,38 @@ const Sync = (() => {
 
   function aktualisiereKopf() {
     const b = document.getElementById('konto-btn');
+    const r = document.getElementById('rangliste-btn');
+    if (r) r.hidden = !aktiv;
     if (!b) return;
     b.hidden = !aktiv;
-    b.textContent = nutzer ? '☁ Angemeldet' : 'Anmelden';
+    b.textContent = nutzer ? '☁ Konto' : 'Anmelden';
     b.title = status;
+  }
+
+  // ---- Rangliste (freiwillig) ----
+  async function ladeEintrag() {
+    if (!nutzer) { eintrag = undefined; return; }
+    const { data, error } = await client.from('rangliste').select('name').eq('user_id', nutzer.id).maybeSingle();
+    eintrag = error ? undefined : data;
+  }
+  function ranglistenDaten() {
+    return Object.assign({ aktualisiert: new Date().toISOString() }, ranglistenWerte());
+  }
+  async function ranglisteSpeichern(name) {
+    if (!name || name.length < 2) return { message: 'Der Spitzname braucht mindestens 2 Zeichen.' };
+    const { error } = await client.from('rangliste')
+      .upsert(Object.assign({ user_id: nutzer.id, name: name.slice(0, 20) }, ranglistenDaten()));
+    if (!error) eintrag = { name: name.slice(0, 20) };
+    return error;
+  }
+  async function ranglisteVerlassen() {
+    const { error } = await client.from('rangliste').delete().eq('user_id', nutzer.id);
+    if (!error) eintrag = null;
+    return error;
+  }
+  async function ranglisteLaden() {
+    return client.from('rangliste').select('user_id,name,sicher,gelernt,prozent')
+      .order('sicher', { ascending: false }).order('gelernt', { ascending: false });
   }
 
   async function abgleichen() {
@@ -59,6 +88,9 @@ const Sync = (() => {
       setzeStatus(fehler
         ? 'Fehler beim Speichern: ' + fehler.message
         : 'Zuletzt synchronisiert um ' + new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) + ' Uhr');
+      // Wer in der Rangliste ist, bekommt dort seine aktuellen Zahlen
+      if (eintrag === undefined) await ladeEintrag();
+      if (eintrag) await client.from('rangliste').update(ranglistenDaten()).eq('user_id', nutzer.id);
     } catch (e) {
       setzeStatus('Offline – wird später synchronisiert');
     } finally {
@@ -89,6 +121,7 @@ const Sync = (() => {
     client.auth.onAuthStateChange((event, session) => {
       const vorher = nutzer;
       nutzer = session ? session.user : null;
+      if (!nutzer || (vorher && vorher.id !== nutzer.id)) eintrag = undefined;
       if (!nutzer) setzeStatus('Nicht angemeldet');
       aktualisiereKopf();
       // Bis app.js geladen ist (Sync.start), nur den Nutzer merken
@@ -105,6 +138,8 @@ const Sync = (() => {
     aktiv,
     get nutzer() { return nutzer; },
     get status() { return status; },
+    get ranglisteEintrag() { return eintrag; },
     start, planeUpload, abgleichen, anmelden, registrieren, abmelden, aktualisiereKopf,
+    ladeEintrag, ranglisteSpeichern, ranglisteVerlassen, ranglisteLaden,
   };
 })();

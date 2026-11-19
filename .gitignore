@@ -1,5 +1,14 @@
 # Privates Lernmaterial (urheberrechtlich geschützt) – niemals veröffentlichen
 Material/
 
+# Sicherheitsnetz: Dokumente nie veröffentlichen, auch wenn sie versehentlich im App-Ordner landen
+*.doc
+*.docx
+*.xls
+*.xlsx
+*.pdf
+*.txt
+*.odt
+
 # Lokale Werkzeuge
 .claude/
