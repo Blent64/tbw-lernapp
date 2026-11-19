@@ -124,7 +124,7 @@ const Sync = (() => {
     try {
       const ablauf = new Promise(r => setTimeout(() => r({ error: { message: 'Zeitüberschreitung' } }), 20000));
       const { data, error } = await Promise.race([
-        client.functions.invoke('bewerten', { body: { frage, musterloesung, antwort } }),
+        client.functions.invoke(cfg.kiFunktion || 'bewerten', { body: { frage, musterloesung, antwort } }),
         ablauf,
       ]);
       if (error) {

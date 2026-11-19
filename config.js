@@ -4,4 +4,6 @@
 window.SYNC_CONFIG = {
   url: 'https://llnofcruggyyqycdmfux.supabase.co',
   key: 'sb_publishable_dv2EWErJUbVuGoQugMXW8g_cLAnHncj',
+  // Name der Edge Function für die KI-Bewertung (Gemini)
+  kiFunktion: 'smooth-processor',
 };
