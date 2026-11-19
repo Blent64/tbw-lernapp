@@ -78,15 +78,22 @@ function zerlege(s) {
     .filter(Boolean)
     .map(w => /^\d/.test(w) ? { roh: w, n: w.replace(/\.(?=\d{3}\b)/g, '') } : { roh: w, n: normal(w) });
 }
+// Nur die wichtigsten Begriffe: Fachwörter (Großschreibung, lang) und Zahlen, höchstens 8
+const MAX_BEGRIFFE = 8;
 function schluesselbegriffe(antwort) {
   const gesehen = new Map();
-  for (const { roh, n } of zerlege(antwort)) {
+  zerlege(antwort).forEach(({ roh, n }, pos) => {
     const zahl = /^\d/.test(n);
-    if (zahl ? n.replace(/\D/g, '').length < 2 : (n.length < 5 || STOPPWOERTER.has(n))) continue;
+    if (zahl ? n.replace(/\D/g, '').length < 2 : (n.length < 5 || STOPPWOERTER.has(n))) return;
     const stamm = zahl ? n : n.slice(0, 6);
-    if (!gesehen.has(stamm)) gesehen.set(stamm, { stamm, wort: roh, n });
-  }
-  return [...gesehen.values()];
+    if (gesehen.has(stamm)) { gesehen.get(stamm).anzahl++; return; }
+    const gewicht = (zahl ? 6 : 0) + (/^[A-ZÄÖÜ]/.test(roh) ? 4 : 0) + Math.min(roh.length, 14) / 2;
+    gesehen.set(stamm, { stamm, wort: roh, n, pos, gewicht, anzahl: 1 });
+  });
+  return [...gesehen.values()]
+    .sort((a, b) => (b.gewicht + b.anzahl * 2) - (a.gewicht + a.anzahl * 2))
+    .slice(0, MAX_BEGRIFFE)
+    .sort((a, b) => a.pos - b.pos);
 }
 function pruefeAntwort(eingabe, antwort) {
   const begriffe = schluesselbegriffe(antwort);
@@ -98,7 +105,7 @@ function pruefeAntwort(eingabe, antwort) {
   }));
   const gefunden = treffer.filter(t => t.ok).length;
   const prozent = treffer.length ? Math.round(gefunden / treffer.length * 100) : 0;
-  const stufe = prozent >= 40 ? 'gut' : prozent >= 20 ? 'mittel' : 'schwach';
+  const stufe = prozent >= 50 ? 'gut' : prozent >= 25 ? 'mittel' : 'schwach';
   const titel = { gut: '👍 Sieht gut aus', mittel: '🤏 Teilweise richtig', schwach: '✗ Da fehlt noch viel' }[stufe];
   return { treffer, gefunden, gesamt: treffer.length, prozent, stufe, titel, vorschlag: stufe === 'gut' };
 }
