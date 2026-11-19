@@ -7,26 +7,7 @@
 const FRAGEN = [
   // Volkswirtschaftslehre: siehe fragen-vwl.js (aus den Lehrgangsskripten)
 
-  // ---------- Rechnungswesen ----------
-  { id: 'rewe-001', fach: 'rewe', thema: 'Kostenrechnung', typ: 'karte', quelle: 'beispiel',
-    frage: 'Welche Fragen beantworten Kostenarten-, Kostenstellen- und Kostenträgerrechnung?',
-    antwort: 'Kostenartenrechnung: Welche Kosten sind entstanden?\nKostenstellenrechnung: Wo sind sie entstanden?\nKostenträgerrechnung: Wofür (für welches Produkt) sind sie entstanden?' },
-  { id: 'rewe-002', fach: 'rewe', thema: 'Teilkostenrechnung', typ: 'mc', quelle: 'beispiel',
-    frage: 'Wie berechnet man den Deckungsbeitrag pro Stück?',
-    optionen: ['Verkaufspreis − variable Stückkosten', 'Verkaufspreis − Fixkosten', 'Umsatz − Gesamtkosten', 'Variable Kosten + Fixkosten'],
-    richtig: 0,
-    erklaerung: 'Der Stückdeckungsbeitrag zeigt, wie viel jedes verkaufte Stück zur Deckung der Fixkosten beiträgt.' },
-  { id: 'rewe-003', fach: 'rewe', thema: 'Teilkostenrechnung', typ: 'karte', art: 'rechnen', quelle: 'beispiel',
-    frage: 'Fixkosten 60.000 €, Verkaufspreis 50 €/Stück, variable Kosten 30 €/Stück. Wo liegt die Gewinnschwelle (Break-even)?',
-    antwort: 'Break-even-Menge = Fixkosten ÷ Stückdeckungsbeitrag\nStückdeckungsbeitrag = 50 € − 30 € = 20 €\n60.000 € ÷ 20 € = 3.000 Stück' },
-  { id: 'rewe-004', fach: 'rewe', thema: 'Abgrenzungsrechnung', typ: 'mc', quelle: 'beispiel',
-    frage: 'Welcher Aufwand ist ein neutraler Aufwand (also keine Kosten)?',
-    optionen: ['Eine Spende an einen Sportverein', 'Löhne in der Fertigung', 'Verbrauch von Rohstoffen', 'Stromkosten der Produktionshalle'],
-    richtig: 0,
-    erklaerung: 'Neutraler Aufwand ist betriebsfremd, periodenfremd oder außerordentlich. Eine Spende hat nichts mit dem eigentlichen Betriebszweck zu tun.' },
-  { id: 'rewe-005', fach: 'rewe', thema: 'Kostenrechnungssysteme', typ: 'karte', quelle: 'beispiel',
-    frage: 'Was ist der Unterschied zwischen Voll- und Teilkostenrechnung?',
-    antwort: 'Vollkostenrechnung: Alle Kosten (fix und variabel) werden auf die Produkte verteilt.\nTeilkostenrechnung: Nur die variablen Kosten werden den Produkten zugerechnet; die Fixkosten werden als Block über den Deckungsbeitrag gedeckt.' },
+  // Rechnungswesen: siehe fragen-rewe.js (aus den Lehrgangsskripten)
 
   // ---------- Finanzierung und Investition ----------
   { id: 'fi-001', fach: 'fi', thema: 'Finanzierung', typ: 'karte', quelle: 'beispiel',
