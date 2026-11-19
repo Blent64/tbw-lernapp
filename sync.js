@@ -10,6 +10,14 @@ const Sync = (() => {
   let status = aktiv ? 'Nicht angemeldet' : 'Synchronisierung nicht eingerichtet';
   let timer = null;
   let laeuft = false;
+  let bereit = false;
+
+  // Wird am Ende von app.js aufgerufen, wenn Fortschritt und Ansichten existieren
+  function start() {
+    bereit = true;
+    aktualisiereKopf();
+    if (nutzer) { abgleichen(); aktualisiereAnsicht(); }
+  }
 
   // Pro Karte gewinnt der neuere Eintrag; alles vor einem Zurücksetzen fällt weg.
   function zusammenfuehren(a, b) {
@@ -36,7 +44,7 @@ const Sync = (() => {
   }
 
   async function abgleichen() {
-    if (!nutzer || laeuft) return;
+    if (!bereit || !nutzer || laeuft) return;
     laeuft = true;
     try {
       setzeStatus('Synchronisiere …');
@@ -82,10 +90,12 @@ const Sync = (() => {
       const vorher = nutzer;
       nutzer = session ? session.user : null;
       if (!nutzer) setzeStatus('Nicht angemeldet');
+      aktualisiereKopf();
+      // Bis app.js geladen ist (Sync.start), nur den Nutzer merken
+      if (!bereit) return;
       // setTimeout: Supabase-Aufrufe nicht direkt im Callback ausführen
       if (nutzer && (!vorher || vorher.id !== nutzer.id)) setTimeout(abgleichen, 0);
       if (!!vorher !== !!nutzer) setTimeout(aktualisiereAnsicht, 0);
-      aktualisiereKopf();
     });
     document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') abgleichen(); });
     window.addEventListener('online', abgleichen);
@@ -95,6 +105,6 @@ const Sync = (() => {
     aktiv,
     get nutzer() { return nutzer; },
     get status() { return status; },
-    planeUpload, abgleichen, anmelden, registrieren, abmelden, aktualisiereKopf,
+    start, planeUpload, abgleichen, anmelden, registrieren, abmelden, aktualisiereKopf,
   };
 })();

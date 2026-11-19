@@ -3,26 +3,7 @@
 // richtig = Position der richtigen Antwort in "optionen" (0 = erste)
 // quelle: 'beispiel' = von Claude erstellte Beispielfrage, bitte inhaltlich prüfen
 const FRAGEN = [
-  // ---------- Volkswirtschaftslehre ----------
-  { id: 'vwl-001', fach: 'vwl', thema: 'Grundlagen', typ: 'karte', quelle: 'beispiel',
-    frage: 'Was versteht man unter Opportunitätskosten?',
-    antwort: 'Der entgangene Nutzen der besten nicht gewählten Alternative. Wer sich für A entscheidet, „verzichtet“ auf den Nutzen von B.' },
-  { id: 'vwl-002', fach: 'vwl', thema: 'Wirtschaftspolitik', typ: 'mc', quelle: 'beispiel',
-    frage: 'Welches Ziel gehört NICHT zum magischen Viereck nach dem Stabilitätsgesetz (1967)?',
-    optionen: ['Preisniveaustabilität', 'Hoher Beschäftigungsstand', 'Gerechte Einkommens- und Vermögensverteilung', 'Außenwirtschaftliches Gleichgewicht'],
-    richtig: 2,
-    erklaerung: 'Das magische Viereck: Preisniveaustabilität, hoher Beschäftigungsstand, außenwirtschaftliches Gleichgewicht und stetiges, angemessenes Wirtschaftswachstum. Gerechte Verteilung und Umweltschutz kommen erst beim magischen Sechseck dazu.' },
-  { id: 'vwl-003', fach: 'vwl', thema: 'Markt und Preis', typ: 'karte', quelle: 'beispiel',
-    frage: 'Wie berechnet man die Preiselastizität der Nachfrage, und wann ist die Nachfrage elastisch?',
-    antwort: 'Elastizität = relative Mengenänderung (in %) ÷ relative Preisänderung (in %).\nBetrag > 1: elastisch (Menge reagiert stark)\nBetrag < 1: unelastisch' },
-  { id: 'vwl-004', fach: 'vwl', thema: 'Markt und Preis', typ: 'mc', quelle: 'beispiel',
-    frage: 'Der Staat legt einen Höchstpreis unterhalb des Gleichgewichtspreises fest. Was ist die Folge?',
-    optionen: ['Nachfrageüberhang', 'Angebotsüberhang', 'Der Markt bleibt im Gleichgewicht', 'Der Preis steigt über den Gleichgewichtspreis'],
-    richtig: 0,
-    erklaerung: 'Beim niedrigeren Preis wollen mehr Leute kaufen, aber weniger Anbieter verkaufen: Die Nachfrage ist größer als das Angebot (Nachfrageüberhang).' },
-  { id: 'vwl-005', fach: 'vwl', thema: 'Volkswirtschaftliche Gesamtrechnung', typ: 'karte', quelle: 'beispiel',
-    frage: 'Was ist der Unterschied zwischen BIP und BNE?',
-    antwort: 'BIP (Inlandskonzept): Wert aller im Inland erzeugten Güter und Dienstleistungen, egal von wem.\nBNE (Inländerkonzept): von Inländern erwirtschaftetes Einkommen, egal wo.\nBNE = BIP + Primäreinkommen aus dem Ausland − Primäreinkommen an das Ausland' },
+  // Volkswirtschaftslehre: siehe fragen-vwl.js (aus den Lehrgangsskripten)
 
   // ---------- Rechnungswesen ----------
   { id: 'rewe-001', fach: 'rewe', thema: 'Kostenrechnung', typ: 'karte', quelle: 'beispiel',

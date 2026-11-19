@@ -302,5 +302,5 @@ document.addEventListener('click', e => {
   }
 });
 
-Sync.aktualisiereKopf();
 zeigeStart();
+Sync.start();
