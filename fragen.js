@@ -9,26 +9,12 @@ const FRAGEN = [
 
   // Rechnungswesen: siehe fragen-rewe.js (aus den Lehrgangsskripten)
 
-  // ---------- Finanzierung und Investition ----------
-  { id: 'fi-001', fach: 'fi', thema: 'Finanzierung', typ: 'karte', quelle: 'beispiel',
-    frage: 'Was besagt der Leverage-Effekt?',
-    antwort: 'Mit mehr Fremdkapital steigt die Eigenkapitalrentabilität, solange die Gesamtkapitalrentabilität höher ist als der Fremdkapitalzins. Ist der Zins höher, kehrt sich der Effekt um (Leverage-Risiko).' },
-  { id: 'fi-002', fach: 'fi', thema: 'Investitionsrechnung', typ: 'mc', quelle: 'beispiel',
-    frage: 'Welches Verfahren ist eine statische Investitionsrechnung?',
-    optionen: ['Amortisationsrechnung', 'Kapitalwertmethode', 'Interne-Zinsfuß-Methode', 'Annuitätenmethode'],
-    richtig: 0,
-    erklaerung: 'Statisch: Kosten-, Gewinn-, Rentabilitäts- und Amortisationsvergleich. Kapitalwert, interner Zinsfuß und Annuität sind dynamische Verfahren, weil sie den Zeitpunkt der Zahlungen berücksichtigen.' },
-  { id: 'fi-003', fach: 'fi', thema: 'Investitionsrechnung', typ: 'karte', quelle: 'beispiel',
-    frage: 'Was bedeutet ein positiver Kapitalwert?',
-    antwort: 'Die Investition bringt mehr als den Kalkulationszinssatz ein. Sie ist vorteilhaft: Das eingesetzte Kapital wird zurückgewonnen, verzinst sich, und es bleibt ein Überschuss.' },
-  { id: 'fi-004', fach: 'fi', thema: 'Finanzierungsarten', typ: 'mc', quelle: 'beispiel',
+  // Finanzierung und Investition: siehe fragen-fi.js (aus den Lehrgangsskripten)
+  { id: 'fi-004', fach: 'fi', thema: 'Finanzierungsarten', typ: 'mc', quelle: 'claude',
     frage: 'Wie lässt sich die Selbstfinanzierung (Einbehalten von Gewinnen) einordnen?',
     optionen: ['Innenfinanzierung mit Eigenkapital', 'Außenfinanzierung mit Eigenkapital', 'Außenfinanzierung mit Fremdkapital', 'Innenfinanzierung mit Fremdkapital'],
     richtig: 0,
     erklaerung: 'Das Geld kommt aus dem Unternehmen selbst (innen) und bleibt Eigenkapital. Innenfinanzierung mit Fremdkapital wäre z. B. die Bildung von Rückstellungen.' },
-  { id: 'fi-005', fach: 'fi', thema: 'Finanzierungsregeln', typ: 'karte', quelle: 'beispiel',
-    frage: 'Was besagt die goldene Bilanzregel?',
-    antwort: 'Langfristig gebundenes Vermögen (Anlagevermögen) soll mit langfristigem Kapital (Eigenkapital + langfristiges Fremdkapital) finanziert werden. Grundsatz der Fristenkongruenz.' },
 
   // ---------- Material-, Produktions- und Absatzwirtschaft ----------
   { id: 'mpa-001', fach: 'mpa', thema: 'Materialwirtschaft', typ: 'karte', quelle: 'beispiel',
