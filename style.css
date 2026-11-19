@@ -1,0 +1,71 @@
+:root {
+  --bg: #f4f6f9; --flaeche: #ffffff; --text: #1c2430; --leise: #5d6b7c; --rand: #dde3ea;
+  --akzent: #1f5fa8; --akzent-text: #ffffff;
+  --gut: #1e8a4c; --gut-bg: #e5f5ec; --schlecht: #c0392b; --schlecht-bg: #fbe9e7;
+  --badge: #fff3cd; --badge-text: #7a5b00;
+  color-scheme: light dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #11161d; --flaeche: #1a212b; --text: #e6ebf1; --leise: #9aa7b6; --rand: #2c3643;
+    --akzent: #5b9be6; --akzent-text: #0b1220;
+    --gut: #4cc27f; --gut-bg: #16301f; --schlecht: #ef7b6e; --schlecht-bg: #3a1c19;
+    --badge: #3d3216; --badge-text: #f0d58a;
+  }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; -webkit-text-size-adjust: 100%; }
+.top { position: sticky; top: 0; z-index: 1; display: flex; justify-content: space-between; align-items: center; background: var(--akzent); padding: 12px 16px; }
+.konto { padding: 4px 12px; border-radius: 999px; border: 1px solid var(--akzent-text); background: none; color: var(--akzent-text); font-size: .9rem; }
+.konto[hidden] { display: none; }
+input { width: 100%; font: inherit; color: inherit; padding: 12px 14px; border-radius: 10px; border: 1px solid var(--rand); background: var(--flaeche); }
+.formular { display: grid; gap: 10px; }
+.formular .breit { margin-top: 2px; }
+.meldung { padding: 10px 14px; border-radius: 8px; background: var(--schlecht-bg); color: var(--schlecht); }
+.link-neutral { border: 0; background: none; padding: 0; color: var(--akzent); text-decoration: underline; font-size: inherit; }
+.logo { background: none; border: 0; padding: 0; color: var(--akzent-text); font-weight: 700; font-size: 1.1rem; }
+main { max-width: 760px; margin: 0 auto; padding: 16px; }
+
+button { font: inherit; color: inherit; cursor: pointer; border-radius: 10px; border: 1px solid var(--rand); background: var(--flaeche); padding: 12px 16px; }
+button:disabled { opacity: .45; cursor: default; }
+.primaer { background: var(--akzent); border-color: var(--akzent); color: var(--akzent-text); font-weight: 600; }
+.breit { width: 100%; margin-top: 12px; }
+.zurueck { border: 0; background: none; padding: 6px 0; color: var(--akzent); }
+.link { border: 0; background: none; padding: 4px; color: var(--schlecht); text-decoration: underline; }
+
+.pruefung { background: var(--flaeche); border: 1px solid var(--rand); border-radius: 14px; padding: 16px; margin-bottom: 20px; }
+.countdown { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; margin-bottom: 12px; }
+.countdown .zahl { font-size: 2.4rem; font-weight: 800; line-height: 1; color: var(--akzent); }
+.countdown .was { font-weight: 600; }
+.countdown small { width: 100%; color: var(--leise); }
+.fachliste { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+.kachel { display: flex; flex-direction: column; gap: 6px; text-align: left; background: var(--bg); }
+.kachel-titel { font-weight: 600; }
+.kachel-info { font-size: .9rem; color: var(--leise); }
+.balken { display: block; height: 6px; border-radius: 3px; overflow: hidden; background: var(--rand); }
+.balken > span { display: block; height: 100%; background: var(--gut); }
+.balken.gross { height: 8px; margin: 8px 0 16px; }
+
+h1 { font-size: 1.5rem; margin: 8px 0 4px; }
+.stats { margin: 0 0 16px; color: var(--leise); }
+.knoepfe { display: grid; gap: 10px; }
+.leer { color: var(--leise); }
+
+.sitzung-kopf { display: flex; justify-content: space-between; align-items: center; color: var(--leise); }
+.karte { background: var(--flaeche); border: 1px solid var(--rand); border-radius: 14px; padding: 20px; }
+.karte-meta { font-size: .85rem; color: var(--leise); }
+.badge { display: inline-block; margin-left: 4px; padding: 1px 8px; border-radius: 999px; font-size: .75rem; background: var(--badge); color: var(--badge-text); }
+.frage { font-size: 1.25rem; margin: 10px 0 18px; }
+.antwort { margin: 12px 0; padding: 12px 14px; border-left: 4px solid var(--akzent); border-radius: 8px; background: var(--bg); }
+.bewertung { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+.ja { background: var(--gut-bg); border-color: var(--gut); color: var(--gut); font-weight: 600; }
+.nein { background: var(--schlecht-bg); border-color: var(--schlecht); color: var(--schlecht); font-weight: 600; }
+.optionen { display: grid; gap: 10px; }
+.option { text-align: left; }
+.option:disabled { opacity: 1; cursor: default; }
+.option.richtig { background: var(--gut-bg); border-color: var(--gut); }
+.option.falsch { background: var(--schlecht-bg); border-color: var(--schlecht); }
+
+.ende { text-align: center; }
+.ende .zahl { font-size: 2rem; font-weight: 800; }
+.fuss { text-align: center; font-size: .9rem; color: var(--leise); }
