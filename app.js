@@ -37,7 +37,7 @@ function speichereFortschritt() {
 let fortschritt = ladeFortschritt();
 
 // Auswahl: Lernform (Karteikarten / Multiple Choice) und Inhalt (Theorie / Rechnen)
-let filter = { form: 'alle', art: 'alle', eingabe: 'an' };
+let filter = { form: 'alle', art: 'alle', eingabe: 'an', erklaer: 'fach' };
 try { filter = Object.assign(filter, JSON.parse(localStorage.getItem(FILTER_KEY)) || {}); } catch (e) { /* egal */ }
 function speichereFilter() { try { localStorage.setItem(FILTER_KEY, JSON.stringify(filter)); } catch (e) { /* egal */ } }
 
@@ -189,6 +189,49 @@ const Vorlesen = (() => {
   return { verfuegbar, sprich, stopp, knopf };
 })();
 
+// ---- Einfach erklärt (KI schreibt die Lösung in einfacher Sprache) ----
+const EINFACH_KEY = 'tbw-einfach-v1';
+let einfachSpeicher = {};
+try { einfachSpeicher = JSON.parse(localStorage.getItem(EINFACH_KEY)) || {}; } catch (e) { /* egal */ }
+const einfachLaeuft = new Set();
+const einfachFehler = {};
+function kurzHash(s) { let h = 5381; for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0; return (h >>> 0).toString(36); }
+function musterVon(f) {
+  return f.typ === 'mc' ? 'Richtige Antwort: ' + f.optionen[f.richtig] + (f.erklaerung ? '\nErklärung: ' + f.erklaerung : '') : f.antwort;
+}
+function frageVon(f) { return f.typ === 'begriff' ? `Erkläre den Fachbegriff „${f.frage}“ in eigenen Worten.` : f.frage; }
+function einfachText(f) {
+  const e = einfachSpeicher[f.id];
+  return e && e.h === kurzHash(musterVon(f)) ? e.text : null;
+}
+function holeEinfach(f) {
+  if (einfachText(f) || einfachLaeuft.has(f.id) || einfachFehler[f.id] || !Sync.nutzer) return;
+  einfachLaeuft.add(f.id);
+  Sync.kiErklaeren(frageVon(f), musterVon(f)).then(r => {
+    einfachLaeuft.delete(f.id);
+    if (typeof r === 'string') {
+      einfachSpeicher[f.id] = { h: kurzHash(musterVon(f)), text: r };
+      try { localStorage.setItem(EINFACH_KEY, JSON.stringify(einfachSpeicher)); } catch (e) { /* egal */ }
+    } else einfachFehler[f.id] = r.fehler;
+    if (sitzung && sitzung.warteschlange[sitzung.pos] === f.id) { const y = window.scrollY; zeigeKarte(); window.scrollTo(0, y); }
+  });
+}
+function einfachBlock(f) {
+  if (filter.erklaer !== 'einfach') return '';
+  const t = einfachText(f);
+  if (t) return `<div class="antwort einfach">${Vorlesen.knopf('einfach-' + f.id)}<strong>🧸 Einfach erklärt</strong><br>${esc(t)}</div>`;
+  if (!Sync.nutzer) return `<p class="stats klein">🧸 Für einfache Erklärungen bitte zuerst anmelden (oben rechts).</p>`;
+  const fe = einfachFehler[f.id];
+  if (fe === 'veraltet') return `<p class="meldung">🧸 „Einfach erklärt“ ist noch nicht fertig eingerichtet: Die KI-Funktion bei Supabase muss noch aktualisiert werden.</p>`;
+  if (fe) return `<p class="stats klein">🧸 Die einfache Erklärung hat gerade nicht geklappt. <button class="link-neutral" data-aktion="einfach-nochmal">Nochmal versuchen</button></p>`;
+  return `<div class="pruefergebnis">🧸 Die KI schreibt eine einfache Erklärung …</div>`;
+}
+// Fachliche Lösung: im Einfach-Modus eingeklappt, sobald die einfache Erklärung da ist
+function fachlich(f, html) {
+  return filter.erklaer === 'einfach' && einfachText(f)
+    ? `<details class="fachlich"><summary>🎓 Fachliche Lösung anzeigen</summary>${html}</details>` : html;
+}
+
 function vorleseText(f) {
   if (f.typ === 'mc') return 'Richtige Antwort: ' + f.optionen[f.richtig] + '.\n' + (f.erklaerung || '');
   return f.antwort;
@@ -245,6 +288,10 @@ function filterLeiste() {
     <div class="segmente zwei" role="group" aria-label="Karteikarten selbst beantworten">
       ${seg('eingabe', 'an', '✍️ Erst selbst antworten')}${seg('eingabe', 'aus', '👀 Nur aufdecken')}
     </div>
+    <div class="segmente zwei" role="group" aria-label="Erklärungen">
+      ${seg('erklaer', 'fach', '🎓 Fachlich erklärt')}${seg('erklaer', 'einfach', '🧸 Einfach erklärt')}
+    </div>
+    ${filter.erklaer === 'einfach' ? '<p class="stats klein">🧸 Die KI erklärt jede Lösung zusätzlich in ganz einfachen Worten (braucht Anmeldung und Internet).</p>' : ''}
   </div>`;
 }
 
@@ -382,6 +429,7 @@ function zeigeKarte() {
   const s = sitzung;
   if (s.pos >= s.warteschlange.length) return zeigeEnde();
   const f = FRAGEN.find(x => x.id === s.warteschlange[s.pos]);
+  if (filter.erklaer === 'einfach') holeEinfach(f); // schon vorab laden, damit sie beim Aufdecken bereit ist
   let inhalt;
   if (f.typ === 'mc') {
     if (!s.optionen) s.optionen = mische(f.optionen.map((text, i) => ({ text, richtig: i === f.richtig })));
@@ -391,7 +439,7 @@ function zeigeKarte() {
       if (beantwortet) kl = o.richtig ? 'richtig' : (i === s.gewaehlt ? 'falsch' : '');
       return `<button class="option ${kl}" data-aktion="waehle" data-i="${i}" ${beantwortet ? 'disabled' : ''}>${esc(o.text)}</button>`;
     }).join('')}</div>
-    ${beantwortet ? `${f.erklaerung ? `<div class="antwort">${Vorlesen.knopf(f.id)}${esc(f.erklaerung)}</div>` : ''}
+    ${beantwortet ? `${einfachBlock(f)}${f.erklaerung ? fachlich(f, `<div class="antwort">${Vorlesen.knopf(f.id)}${esc(f.erklaerung)}</div>`) : ''}
       <button class="primaer breit" data-aktion="weiter">Weiter</button>` : ''}`;
   } else if (s.aufgedeckt) {
     const p = s.pruefung;
@@ -412,7 +460,8 @@ function zeigeKarte() {
     const gut = k ? k.urteil === 'richtig' : p && p.vorschlag;
     const vorschlagJa = (k || p) && gut, vorschlagNein = (k || p) && !gut;
     inhalt = `${ergebnis}
-      <div class="antwort">${Vorlesen.knopf(f.id)}<strong>Musterlösung</strong><br>${esc(f.antwort)}</div>
+      ${einfachBlock(f)}
+      ${fachlich(f, `<div class="antwort">${Vorlesen.knopf(f.id)}<strong>Musterlösung</strong><br>${esc(f.antwort)}</div>`)}
       ${k ? '<p class="stats klein">Bewertet von KI (Google Gemini) – sie kann sich irren. Entscheide am Ende selbst.</p>'
         : p ? '<p class="stats klein">Die Prüfung vergleicht nur Schlüsselbegriffe – entscheide am Ende selbst ehrlich.</p>' : ''}
       <div class="bewertung">
@@ -551,8 +600,16 @@ document.addEventListener('click', e => {
   if (d.aktion !== 'vorlesen') Vorlesen.stopp();
   switch (d.aktion) {
     case 'vorlesen': {
-      const f = FRAGEN.find(x => x.id === d.ziel);
-      if (f) Vorlesen.sprich(f.id, vorleseText(f));
+      const einfach = d.ziel.startsWith('einfach-');
+      const f = FRAGEN.find(x => x.id === d.ziel.replace(/^einfach-/, ''));
+      const text = f && (einfach ? einfachText(f) : vorleseText(f));
+      if (text) Vorlesen.sprich(d.ziel, text);
+      break;
+    }
+    case 'einfach-nochmal': {
+      const f = FRAGEN.find(x => x.id === sitzung.warteschlange[sitzung.pos]);
+      delete einfachFehler[f.id];
+      zeigeKarte();
       break;
     }
     case 'start': sitzung = null; zeigeStart(); break;
@@ -587,8 +644,7 @@ document.addEventListener('click', e => {
       s.kiLaeuft = !!Sync.nutzer;
       zeigeKarte();
       if (s.kiLaeuft) {
-        const frageText = f.typ === 'begriff' ? `Erkläre den Fachbegriff „${f.frage}“ in eigenen Worten.` : f.frage;
-        Sync.kiBewerten(frageText, f.antwort, text).then(ergebnis => {
+        Sync.kiBewerten(frageVon(f), f.antwort, text, filter.erklaer === 'einfach').then(ergebnis => {
           // Nur anzeigen, wenn noch dieselbe Karte offen ist
           if (sitzung !== s || s.warteschlange[s.pos] !== id || !s.aufgedeckt) return;
           s.kiLaeuft = false; s.ki = ergebnis;

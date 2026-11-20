@@ -119,12 +119,29 @@ const Sync = (() => {
 
   // KI-Bewertung über die Edge Function "bewerten" (Gemini). null = nicht verfügbar → Begriffsprüfung
   let kiAus = false;
-  async function kiBewerten(frage, musterloesung, antwort) {
+  // Einfache Erklärung der Musterlösung. Ergebnis: Text, oder { fehler: '…' }
+  async function kiErklaeren(frage, musterloesung) {
+    if (!aktiv || !nutzer) return { fehler: 'anmelden' };
+    try {
+      const ablauf = new Promise(r => setTimeout(() => r({ error: { message: 'Zeitüberschreitung' } }), 30000));
+      const { data, error } = await Promise.race([
+        client.functions.invoke(cfg.kiFunktion || 'bewerten', { body: { modus: 'erklaeren', frage, musterloesung } }),
+        ablauf,
+      ]);
+      if (error) {
+        const status = error.context && error.context.status;
+        return { fehler: status === 400 ? 'veraltet' : 'fehler' };
+      }
+      return data && data.erklaerung ? data.erklaerung : { fehler: 'fehler' };
+    } catch (e) { return { fehler: 'fehler' }; }
+  }
+
+  async function kiBewerten(frage, musterloesung, antwort, einfach) {
     if (!aktiv || !nutzer || kiAus) return null;
     try {
       const ablauf = new Promise(r => setTimeout(() => r({ error: { message: 'Zeitüberschreitung' } }), 20000));
       const { data, error } = await Promise.race([
-        client.functions.invoke(cfg.kiFunktion || 'bewerten', { body: { frage, musterloesung, antwort } }),
+        client.functions.invoke(cfg.kiFunktion || 'bewerten', { body: { frage, musterloesung, antwort, einfach: !!einfach } }),
         ablauf,
       ]);
       if (error) {
@@ -158,7 +175,7 @@ const Sync = (() => {
     get nutzer() { return nutzer; },
     get status() { return status; },
     get ranglisteEintrag() { return eintrag; },
-    start, planeUpload, abgleichen, anmelden, registrieren, abmelden, aktualisiereKopf, kiBewerten,
+    start, planeUpload, abgleichen, anmelden, registrieren, abmelden, aktualisiereKopf, kiBewerten, kiErklaeren,
     ladeEintrag, ranglisteSpeichern, ranglisteVerlassen, ranglisteLaden,
   };
 })();

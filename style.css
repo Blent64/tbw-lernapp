@@ -33,6 +33,9 @@ input { width: 100%; font: inherit; color: inherit; padding: 12px 14px; border-r
   .segmente.vier .seg:nth-child(3) { border-left: 0; }
   .segmente.vier .seg:nth-child(n+3) { border-top: 1px solid var(--rand); }
 }
+.antwort.einfach { border-left-color: #e0a100; }
+details.fachlich { margin-top: 12px; }
+details.fachlich summary { cursor: pointer; padding: 8px 0; font-weight: 600; }
 .vorlesen { float: right; margin: -4px -4px 8px 10px; padding: 6px 12px; font-size: .85rem; }
 .vorlesen.aktiv { background: var(--akzent); color: var(--akzent-text); border-color: var(--akzent); }
 .begriff-hinweis { margin: 0 0 4px; font-size: .9rem; opacity: .75; }
