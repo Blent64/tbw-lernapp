@@ -134,6 +134,66 @@ const Sprache = (() => {
   return { verfuegbar: !!SR, umschalten, stopp };
 })();
 
+// ---- Vorlesen (Sprachausgabe des Browsers, kostenlos) -----------------
+const Vorlesen = (() => {
+  const syn = window.speechSynthesis;
+  const verfuegbar = !!syn && 'SpeechSynthesisUtterance' in window;
+  let aktiv = null;
+  function stimme() {
+    const de = syn.getVoices().filter(v => /^de/i.test(v.lang));
+    return de.find(v => /google|premium|enhanced|natural|online/i.test(v.name)) || de[0] || null;
+  }
+  // Zeichen und Abkürzungen so umschreiben, dass sie gut vorgelesen werden
+  function aufbereiten(t) {
+    return t
+      .replace(/z\.\s?B\./g, 'zum Beispiel').replace(/bzw\./g, 'beziehungsweise').replace(/ggf\./g, 'gegebenenfalls')
+      .replace(/d\.\s?h\./g, 'das heißt').replace(/u\.\s?a\./g, 'unter anderem').replace(/usw\./g, 'und so weiter')
+      .replace(/inkl\./g, 'inklusive').replace(/max\./g, 'maximal').replace(/mind\./g, 'mindestens').replace(/ca\./g, 'circa')
+      .replace(/÷/g, ' geteilt durch ').replace(/×/g, ' mal ').replace(/ − /g, ' minus ').replace(/ \+ /g, ' plus ')
+      .replace(/ = /g, ' gleich ').replace(/→/g, ', also ').replace(/≥/g, ' mindestens ').replace(/≤/g, ' höchstens ')
+      .replace(/(\d)\s?%/g, '$1 Prozent').replace(/€/g, ' Euro').replace(/\^/g, ' hoch ');
+  }
+  // In kurze Stücke teilen: manche Browser brechen lange Texte sonst ab
+  function stuecke(t) {
+    return aufbereiten(t).split(/\n+/).flatMap(z => z.match(/[^.!?;:]+[.!?;:]*/g) || []).map(s => s.trim()).filter(Boolean);
+  }
+  function knoepfe() {
+    document.querySelectorAll('[data-aktion="vorlesen"]').forEach(b => {
+      const an = b.dataset.ziel === aktiv;
+      b.textContent = an ? '⏹ Stopp' : '🔊 Vorlesen';
+      b.classList.toggle('aktiv', an);
+    });
+  }
+  function stopp() { if (!verfuegbar) return; aktiv = null; syn.cancel(); knoepfe(); }
+  function sprich(ziel, text) {
+    if (!verfuegbar) return;
+    if (aktiv === ziel) return stopp();
+    syn.cancel();
+    aktiv = ziel;
+    const teile = stuecke(text), v = stimme();
+    teile.forEach((teil, i) => {
+      const u = new SpeechSynthesisUtterance(teil);
+      u.lang = 'de-DE'; if (v) u.voice = v;
+      if (i === teile.length - 1) u.onend = () => { if (aktiv === ziel) { aktiv = null; knoepfe(); } };
+      u.onerror = () => { if (aktiv === ziel) { aktiv = null; knoepfe(); } };
+      syn.speak(u);
+    });
+    knoepfe();
+  }
+  function knopf(ziel) {
+    if (!verfuegbar) return '';
+    const an = aktiv === ziel;
+    return `<button class="vorlesen ${an ? 'aktiv' : ''}" data-aktion="vorlesen" data-ziel="${ziel}">${an ? '⏹ Stopp' : '🔊 Vorlesen'}</button>`;
+  }
+  if (verfuegbar) syn.getVoices();
+  return { verfuegbar, sprich, stopp, knopf };
+})();
+
+function vorleseText(f) {
+  if (f.typ === 'mc') return 'Richtige Antwort: ' + f.optionen[f.richtig] + '.\n' + (f.erklaerung || '');
+  return f.antwort;
+}
+
 function mische(arr) {
   const a = arr.slice();
   for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
@@ -331,7 +391,7 @@ function zeigeKarte() {
       if (beantwortet) kl = o.richtig ? 'richtig' : (i === s.gewaehlt ? 'falsch' : '');
       return `<button class="option ${kl}" data-aktion="waehle" data-i="${i}" ${beantwortet ? 'disabled' : ''}>${esc(o.text)}</button>`;
     }).join('')}</div>
-    ${beantwortet ? `${f.erklaerung ? `<div class="antwort">${esc(f.erklaerung)}</div>` : ''}
+    ${beantwortet ? `${f.erklaerung ? `<div class="antwort">${Vorlesen.knopf(f.id)}${esc(f.erklaerung)}</div>` : ''}
       <button class="primaer breit" data-aktion="weiter">Weiter</button>` : ''}`;
   } else if (s.aufgedeckt) {
     const p = s.pruefung;
@@ -352,7 +412,7 @@ function zeigeKarte() {
     const gut = k ? k.urteil === 'richtig' : p && p.vorschlag;
     const vorschlagJa = (k || p) && gut, vorschlagNein = (k || p) && !gut;
     inhalt = `${ergebnis}
-      <div class="antwort"><strong>Musterlösung</strong><br>${esc(f.antwort)}</div>
+      <div class="antwort">${Vorlesen.knopf(f.id)}<strong>Musterlösung</strong><br>${esc(f.antwort)}</div>
       ${k ? '<p class="stats klein">Bewertet von KI (Google Gemini) – sie kann sich irren. Entscheide am Ende selbst.</p>'
         : p ? '<p class="stats klein">Die Prüfung vergleicht nur Schlüsselbegriffe – entscheide am Ende selbst ehrlich.</p>' : ''}
       <div class="bewertung">
@@ -393,6 +453,7 @@ function zeigeKarte() {
 function naechste(gewusst) {
   const s = sitzung;
   const id = s.warteschlange[s.pos];
+  Vorlesen.stopp();
   bewerte(id, gewusst);
   if (gewusst) s.richtig++;
   else {
@@ -487,7 +548,13 @@ document.addEventListener('click', e => {
   const b = e.target.closest('[data-aktion]');
   if (!b || b.disabled) return;
   const d = b.dataset;
+  if (d.aktion !== 'vorlesen') Vorlesen.stopp();
   switch (d.aktion) {
+    case 'vorlesen': {
+      const f = FRAGEN.find(x => x.id === d.ziel);
+      if (f) Vorlesen.sprich(f.id, vorleseText(f));
+      break;
+    }
     case 'start': sitzung = null; zeigeStart(); break;
     case 'fach': zeigeFach(d.fach); break;
     case 'filter':

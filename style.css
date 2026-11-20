@@ -33,8 +33,10 @@ input { width: 100%; font: inherit; color: inherit; padding: 12px 14px; border-r
   .segmente.vier .seg:nth-child(3) { border-left: 0; }
   .segmente.vier .seg:nth-child(n+3) { border-top: 1px solid var(--rand); }
 }
+.vorlesen { float: right; margin: -4px -4px 8px 10px; padding: 6px 12px; font-size: .85rem; }
+.vorlesen.aktiv { background: var(--akzent); color: var(--akzent-text); border-color: var(--akzent); }
 .begriff-hinweis { margin: 0 0 4px; font-size: .9rem; opacity: .75; }
-.frage.begriff { font-size: 1.5rem; }
+.frage.begriff { font-size: 1.5rem; hyphens: auto; -webkit-hyphens: auto; overflow-wrap: break-word; }
 .eingabe { width: 100%; font: inherit; color: inherit; padding: 12px 14px; border-radius: 10px; border: 1px solid var(--rand); background: var(--bg); resize: vertical; }
 .eingabe-knoepfe { display: flex; gap: 10px; margin-top: 10px; }
 .eingabe-knoepfe button { flex: 1; }
