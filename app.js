@@ -176,8 +176,8 @@ function filterLeiste() {
   const seg = (gruppe, wert, text) =>
     `<button class="seg ${filter[gruppe] === wert ? 'aktiv' : ''}" data-aktion="filter" data-gruppe="${gruppe}" data-wert="${wert}" aria-pressed="${filter[gruppe] === wert}">${text}</button>`;
   return `<div class="filter">
-    <div class="segmente" role="group" aria-label="Lernform">
-      ${seg('form', 'karte', '🗂 Karteikarten')}${seg('form', 'mc', '✅ Multiple Choice')}${seg('form', 'alle', 'Beides')}
+    <div class="segmente vier" role="group" aria-label="Lernform">
+      ${seg('form', 'karte', '🗂 Karteikarten')}${seg('form', 'mc', '✅ Multiple Choice')}${seg('form', 'begriff', '🔤 Fachbegriffe')}${seg('form', 'alle', 'Alles')}
     </div>
     <div class="segmente" role="group" aria-label="Inhalt">
       ${seg('art', 'theorie', '📖 Theorie')}${seg('art', 'rechnen', '🧮 Rechnen')}${seg('art', 'alle', 'Beides')}
@@ -256,7 +256,7 @@ function zeigeFach(fach) {
   zeige(`<button class="zurueck" data-aktion="start">← Übersicht</button>
     <h1>${esc(FAECHER[fach])}</h1>
     <p class="stats">${s.gesamt} Fragen · ${s.faellig} fällig · ${s.prozent}% sicher</p>
-    ${s.gesamt ? `<p class="stats klein">🗂 ${n(f => f.typ === 'karte')} Karteikarten · ✅ ${n(f => f.typ === 'mc')} Multiple Choice · 📖 ${n(f => artVon(f) === 'theorie')} Theorie · 🧮 ${n(f => artVon(f) === 'rechnen')} Rechnen</p>
+    ${s.gesamt ? `<p class="stats klein">🗂 ${n(f => f.typ === 'karte')} Karteikarten · ✅ ${n(f => f.typ === 'mc')} Multiple Choice · 🔤 ${n(f => f.typ === 'begriff')} Fachbegriffe ·📖 ${n(f => artVon(f) === 'theorie')} Theorie · 🧮 ${n(f => artVon(f) === 'rechnen')} Rechnen</p>
       ${filterLeiste()}
       ${lernKnoepfe(alle.filter(passtFilter), `data-fach="${fach}"`)}`
     : `<p class="leer">Für dieses Fach gibt es noch keine Fragen.</p>`}`);
@@ -360,7 +360,7 @@ function zeigeKarte() {
         <button class="ja ${vorschlagJa ? 'vorschlag' : ''}" data-aktion="bewerte" data-gewusst="1">Gewusst</button>
       </div>`;
   } else if (filter.eingabe === 'an') {
-    inhalt = `<textarea id="eingabe" class="eingabe" rows="5" placeholder="Deine Antwort … (tippen${Sprache.verfuegbar ? ' oder 🎤 sprechen' : ''})">${escText(s.eingabe || '')}</textarea>
+    inhalt = `<textarea id="eingabe" class="eingabe" rows="5" placeholder="${f.typ === 'begriff' ? 'Erkläre den Begriff in eigenen Worten' : 'Deine Antwort'} … (tippen${Sprache.verfuegbar ? ' oder 🎤 sprechen' : ''})">${escText(s.eingabe || '')}</textarea>
       <div class="eingabe-knoepfe">
         ${Sprache.verfuegbar ? '<button data-aktion="sprechen" id="mic">🎤 Sprechen</button>' : ''}
         <button class="primaer" data-aktion="pruefen">Antwort prüfen</button>
@@ -368,9 +368,10 @@ function zeigeKarte() {
       ${Sprache.verfuegbar ? '' : '<p class="stats klein">Tipp: Zum Sprechen das 🎤 auf deiner Tastatur antippen.</p>'}
       <p><button class="link-neutral" data-aktion="aufdecken">Weiß ich nicht – Lösung zeigen</button></p>`;
   } else {
-    inhalt = `<button class="primaer breit" data-aktion="aufdecken">${artVon(f) === 'rechnen' ? 'Lösungsweg zeigen' : 'Antwort zeigen'}</button>`;
+    inhalt = `<button class="primaer breit" data-aktion="aufdecken">${artVon(f) === 'rechnen' ? 'Lösungsweg zeigen' : f.typ === 'begriff' ? 'Erklärung zeigen' : 'Antwort zeigen'}</button>`;
   }
   const marken = [
+    f.typ === 'begriff' ? '<span class="badge">🔤 Fachbegriff</span>' : '',
     artVon(f) === 'rechnen' ? '<span class="badge rechnen">🧮 Rechnen</span>' : '',
     f.quelle === 'beispiel' ? '<span class="badge">Beispiel – bitte prüfen</span>' : '',
     f.quelle === 'claude' ? '<span class="badge">Übung von Claude</span>' : '',
@@ -383,7 +384,8 @@ function zeigeKarte() {
     <div class="balken gross"><span style="width:${Math.round(s.pos / s.warteschlange.length * 100)}%"></span></div>
     <article class="karte">
       <div class="karte-meta">${esc(FAECHER[f.fach])}${f.thema ? ' · ' + esc(f.thema) : ''}${marken}</div>
-      <h2 class="frage">${esc(f.frage)}</h2>
+      ${f.typ === 'begriff' ? '<p class="begriff-hinweis">Erkläre in eigenen Worten:</p>' : ''}
+      <h2 class="frage ${f.typ === 'begriff' ? 'begriff' : ''}">${esc(f.frage)}</h2>
       ${inhalt}
     </article>`);
 }
@@ -518,7 +520,8 @@ document.addEventListener('click', e => {
       s.kiLaeuft = !!Sync.nutzer;
       zeigeKarte();
       if (s.kiLaeuft) {
-        Sync.kiBewerten(f.frage, f.antwort, text).then(ergebnis => {
+        const frageText = f.typ === 'begriff' ? `Erkläre den Fachbegriff „${f.frage}“ in eigenen Worten.` : f.frage;
+        Sync.kiBewerten(frageText, f.antwort, text).then(ergebnis => {
           // Nur anzeigen, wenn noch dieselbe Karte offen ist
           if (sitzung !== s || s.warteschlange[s.pos] !== id || !s.aufgedeckt) return;
           s.kiLaeuft = false; s.ki = ergebnis;

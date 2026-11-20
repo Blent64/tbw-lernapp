@@ -27,6 +27,14 @@ input { width: 100%; font: inherit; color: inherit; padding: 12px 14px; border-r
 .seg + .seg { border-left: 1px solid var(--rand); }
 .seg.aktiv { background: var(--akzent); color: var(--akzent-text); font-weight: 600; }
 .segmente.zwei { grid-template-columns: 1fr 1fr; }
+.segmente.vier { grid-template-columns: repeat(4, 1fr); }
+@media (max-width: 560px) {
+  .segmente.vier { grid-template-columns: 1fr 1fr; }
+  .segmente.vier .seg:nth-child(3) { border-left: 0; }
+  .segmente.vier .seg:nth-child(n+3) { border-top: 1px solid var(--rand); }
+}
+.begriff-hinweis { margin: 0 0 4px; font-size: .9rem; opacity: .75; }
+.frage.begriff { font-size: 1.5rem; }
 .eingabe { width: 100%; font: inherit; color: inherit; padding: 12px 14px; border-radius: 10px; border: 1px solid var(--rand); background: var(--bg); resize: vertical; }
 .eingabe-knoepfe { display: flex; gap: 10px; margin-top: 10px; }
 .eingabe-knoepfe button { flex: 1; }
