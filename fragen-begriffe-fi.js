@@ -1,0 +1,57 @@
+// Fachbegriffe Finanzierung und Investition – nur Begriffe und Inhalte aus den Lehrgangsfolien (eigene Formulierungen)
+FRAGEN.push(...begriffe('fi', [
+  // Wo. 06 Analyse der finanzwirtschaftlichen Prozesse Teil 1
+  ['Grundlagen', 'Finanzierung', 'Beschaffung und Bereitstellung von Kapital (Mittelherkunft, Passivseite). Arten: Eigen- und Fremdfinanzierung, Innen- und Außenfinanzierung.'],
+  ['Grundlagen', 'Investition', 'Verwendung der Mittel in Vermögensgegenständen (Mittelverwendung, Aktivseite), um künftig Erträge zu steigern oder Kosten zu senken. Arten: Sach-, Finanz- und immaterielle Investitionen.'],
+  ['Finanzwirtschaftliche Ziele', 'Finanzwirtschaftliche Ziele', 'Liquidität (jederzeit zahlungsfähig), Rentabilität (Kapital gewinnbringend einsetzen), Sicherheit (Risiken begrenzen) und Unabhängigkeit (kein Einfluss von Kapitalgebern). Zielkonflikte, z. B. Rentabilität vs. Liquidität: liquide Mittel bringen kaum Zinsen.'],
+  ['Liquidität', 'Liquiditätsgrade', 'Liquidität 1. Grades (Barliquidität) = flüssige Mittel ÷ kurzfristiges Fremdkapital × 100\nLiquidität 2. Grades (Einzugsliquidität) = (flüssige Mittel + kurzfristige Forderungen) ÷ kurzfristige Verbindlichkeiten × 100, Faustregel ≥ 100 %\nLiquidität 3. Grades (Umsatzliquidität) = zusätzlich + Vorräte, Faustregel ≥ 150–200 %'],
+  ['Liquidität', 'Natürliche und künstliche Liquidität', 'Natürliche Liquidität entsteht aus dem laufenden Geschäftsprozess und ist nachhaltig.\nKünstliche Liquidität wird durch externe Maßnahmen geschaffen (z. B. Kredite, Verkäufe), überbrückt Engpässe und macht abhängig von Kapitalgebern.'],
+  ['Rentabilität', 'Eigenkapitalrentabilität', 'EKR = Gewinn ÷ Eigenkapital × 100.'],
+  ['Rentabilität', 'Gesamtkapitalrentabilität', 'GKR = (Gewinn + Fremdkapitalzinsen) ÷ Gesamtkapital × 100; unabhängig von der Finanzierungsstruktur. Liegt sie unter dem Fremdkapitalzins, arbeitet das Unternehmen ineffizient.'],
+  ['Rentabilität', 'Umsatzrentabilität', 'Jahresergebnis (oder EBT) ÷ Umsatzerlöse × 100.'],
+  ['Rentabilität', 'Return on Investment (ROI)', 'ROI = Umsatzrentabilität × Kapitalumschlag (Umsatz ÷ Gesamtkapital). Spitze des DuPont-Kennzahlensystems.'],
+  ['Prüfungsaufgabe', 'DuPont-Kennzahlensystem', 'Baumstruktur mit dem ROI an der Spitze; die Äste zerlegen Gewinn, Umsatz und Gesamtkapital bis auf einzelne Positionen. Stärke: zeigt Wechselwirkungen, Daten aus dem Jahresabschluss. Schwäche: vergangenheitsbezogen, rein monetär, Liquidität und Risiko fehlen. Ergänzung: Balanced Scorecard.'],
+  ['Unabhängigkeit', 'Covenants', 'Vertragliche Nebenabreden im Kreditvertrag, z. B. eine Mindest-Eigenkapitalquote. Werden sie verletzt, kann die Bank kündigen oder nachverhandeln; sie schränken die Unabhängigkeit ein.'],
+
+  // Wo. 06 Teil 2
+  ['Finanzierungsregeln', 'Vertikale und horizontale Finanzierungsregeln', 'Vertikal: betrachten nur eine Bilanzseite, die Kapitalstruktur (EK-Quote, FK-Quote, Verschuldungsgrad).\nHorizontal: stimmen Aktiva und Passiva nach Fristen ab (Deckungsgrade, Liquiditätsgrade, goldene Bankregel).'],
+  ['Kapitalstruktur', 'Eigenkapitalquote', 'EK-Quote = Eigenkapital ÷ Gesamtkapital × 100. Über 50 % sehr solide, 30–50 % gesund, 10–30 % hohe Abhängigkeit, unter 10 % kritisch.'],
+  ['Kapitalstruktur', 'Fremdkapitalquote', 'FK-Quote = Fremdkapital ÷ Gesamtkapital × 100. Unter 50 % gesund, 50–70 % üblich, über 70 % sehr hohes Risiko.'],
+  ['Kapitalstruktur', 'Statischer Verschuldungsgrad', 'Fremdkapital ÷ Eigenkapital × 100. Unter 100 % gesund, 100–200 % mäßig, über 200 % hohe Abhängigkeit.'],
+  ['Leverage-Effekt', 'Leverage-Effekt', 'Mit zusätzlichem Fremdkapital steigt die Eigenkapitalrentabilität, solange die Gesamtkapitalrentabilität über dem Fremdkapitalzins liegt:\nEKR = GKR + (GKR − i) × FK/EK.\nSinnvoll bei sicherer Rendite über den FK-Kosten und langer Zinsbindung.'],
+  ['Leverage-Effekt', 'Leverage-Risiko', 'Fällt die Gesamtkapitalrentabilität unter den Fremdkapitalzins, kehrt sich der Hebel um und die Eigenkapitalrentabilität sinkt. Dazu kommen Zinsänderungsrisiko, feste Zins- und Tilgungslasten und sinkende Bonität.'],
+  ['Deckungsgrade', 'Deckungsgrade A, B und C', 'A = EK ÷ Anlagevermögen ≥ 1 (strengste Regel)\nB = (EK + langfristiges FK) ÷ Anlagevermögen ≥ 1\nC = (EK + langfristiges FK) ÷ (AV + langfristiges UV, z. B. eiserner Bestand) ≥ 1'],
+  ['Deckungsgrade', 'Goldene Bilanzregel', 'Grundidee der Fristenkongruenz: Langfristig gebundenes Vermögen soll langfristig finanziert sein. Gemessen mit den Deckungsgraden A, B und C.'],
+  ['Finanzierungsregeln', 'Goldene Bankregel', 'Mittelbindung und Kapitalverfügbarkeit sollen übereinstimmen:\nkurzfristiges Vermögen ÷ kurzfristiges Kapital ≥ 1\nlangfristiges Vermögen ÷ langfristiges Kapital ≤ 1\nAlso Maschinen und Gebäude nicht mit kurzfristigen Krediten finanzieren.'],
+  ['Working Capital', 'Working Capital', 'Kurzfristiges Umlaufvermögen − kurzfristige Verbindlichkeiten. Positiv = Puffer, kurzfristige Verpflichtungen sind gedeckt. Negativ = Liquiditätsengpass droht.'],
+  ['Working Capital', 'Netto Working Capital', 'Kurzfristiges Umlaufvermögen − kurzfristige Verbindlichkeiten − liquide Mittel. Zeigt, welcher Teil des kurzfristigen UV langfristig finanziert ist; sollte möglichst klein sein.'],
+  ['Dynamische Analyse', 'Dynamischer Verschuldungsgrad', 'Fremdkapital ÷ Cashflow (Entschuldungsdauer): In wie vielen Jahren die Schulden aus dem Cashflow getilgt werden könnten. Höchstens 3,5 Jahre gelten als gut.'],
+  ['Kennzahlen', 'Selbstfinanzierungsgrad', 'Gewinnrücklagen ÷ Eigenkapital × 100. Zeigt, wie viel Eigenkapital aus eigener Kraft (einbehaltene Gewinne) stammt; hoch ist positiv fürs Bankrating.'],
+  ['Kennzahlen', 'Anlagenintensität', 'Anlagevermögen ÷ Gesamtkapital × 100. Bei Produktionsunternehmen sind etwa 40–70 % üblich.'],
+
+  // Wo. 07 Finanzmathematik
+  ['Zinsrechnung', 'Aufzinsung und Abzinsung', 'Aufzinsung (Zinseszins): Kn = K0 × qⁿ mit q = 1 + p/100.\nAbzinsung (Barwert): K0 = Kn ÷ qⁿ – der heutige Wert einer künftigen Zahlung.'],
+  ['Zinsrechnung', 'Einfache (unterjährige) Zinsen', 'Für Bruchteile eines Jahres: Z = K × p × T ÷ (100 × 360), das Jahr vereinfacht mit 360 Tagen (Methode 30/360).'],
+  ['Rentenrechnung', 'Rente (Finanzmathematik)', 'Eine Reihe gleich hoher Zahlungen in gleichen Zeitabständen über eine Laufzeit (nicht die Altersrente), z. B. Sparpläne, Kreditraten, Leasingraten.'],
+  ['Rentenrechnung', 'Nachschüssige und vorschüssige Rente', 'Nachschüssig: Zahlung am Periodenende (z. B. Miete, Kredittilgung).\nVorschüssig: Zahlung am Periodenanfang (z. B. Versicherungsprämien); sie ist mehr wert, weil jede Zahlung eine Periode länger verzinst wird (zusätzlich × q).'],
+  ['Rentenrechnung', 'Rentenbarwert und Rentenendwert', 'Rentenendwert nachschüssig: E × (qⁿ − 1) ÷ (q − 1).\nRentenbarwert nachschüssig: E × (qⁿ − 1) ÷ (qⁿ × (q − 1)).\nVorschüssig jeweils zusätzlich × q.'],
+  ['Rentenrechnung', 'Ewige Rente', 'Zahlungen ohne zeitliche Begrenzung. Barwert nachschüssig: K0 = E ÷ i; vorschüssig: K0 = E × q ÷ i.'],
+  ['Kredittilgung', 'Annuitätentilgung', 'Die jährliche Rate (Annuität = Zins + Tilgung) bleibt gleich; der Zinsanteil sinkt, der Tilgungsanteil steigt. Annuitätenfaktor = qⁿ(q − 1) ÷ (qⁿ − 1). Verbreitet bei Bau- und Investitionskrediten.'],
+  ['Kredittilgung', 'Ratentilgung', 'Die Tilgung bleibt gleich; die Zinsen auf die schrumpfende Restschuld sinken, deshalb sinkt die jährliche Gesamtbelastung.'],
+  ['Kredittilgung', 'Endfällige Tilgung', 'Fälligkeitsdarlehen: Während der Laufzeit werden nur Zinsen auf die volle Summe gezahlt, getilgt wird komplett am Ende.'],
+  ['Effektivzins', 'Effektivzins und Nominalzins', 'Nominalzins: vertraglicher Satz auf den Nennbetrag.\nEffektivzins: tatsächlicher Jahreszins inklusive aller Kreditkosten, bezogen auf den ausgezahlten Betrag; dient zum Vergleich von Angeboten. Er steigt durch Damnum, Gebühren und frühere Zahlungszeitpunkte.'],
+  ['Effektivzins', 'Damnum (Disagio)', 'Abschlag vom Nennbetrag eines Kredits: Man bekommt weniger ausgezahlt, verzinst und tilgt aber den vollen Betrag. Erhöht den Effektivzins.'],
+
+  // Wo. 07 Investitionsrechnung, Investitionsarten
+  ['Investitionsrechnung', 'Statische Investitionsrechnung', 'Rechnet mit einer repräsentativen Periode, ohne zeitliche Unterschiede der Zahlungen; einfach, in der Praxis häufig, aber ungenauer. Verfahren: Kosten-, Gewinn-, Rentabilitäts- und Amortisationsvergleich.'],
+  ['Investitionsrechnung', 'Dynamische Investitionsrechnung', 'Betrachtet alle Perioden der Nutzungsdauer und zinst Ein- und Auszahlungen ab, berücksichtigt also den Zeitwert des Geldes; genauer, aber komplexer. Verfahren: Kapitalwert, interner Zinsfuß, Annuität, dynamische Amortisation.'],
+  ['Investitionsrechnung', 'Rentabilitätsvergleichsrechnung', 'Rentabilität = Return (Gewinn bzw. Gewinn + Zinsen) × 100 ÷ Kapitaleinsatz, oft der durchschnittliche Kapitaleinsatz (Anschaffungswert ÷ 2).'],
+  ['Investitionsrechnung', 'Statische Amortisationszeit', 'Zeit, bis das eingesetzte Kapital zurückgeflossen ist:\ntw = (Anschaffungswert − Restwert) ÷ (Gewinn + Abschreibung).'],
+  ['Investitionsrechnung', 'Kapitalwertmethode', 'Dynamisches Verfahren: Alle Ein- und Auszahlungen werden auf den Anfangszeitpunkt abgezinst und saldiert. Ein positiver Kapitalwert bedeutet: Die Investition verzinst sich besser als der Kalkulationszins.'],
+  ['Investitionsrechnung', 'Interner Zinsfuß', 'Zinssatz, bei dem der Kapitalwert genau null ist – die tatsächliche Rendite der Investition. Vorteilhaft, wenn er über dem Kalkulationszins liegt. Ermittelt meist per Interpolation zwischen einem positiven und einem negativen Kapitalwert.'],
+  ['Investitionsrechnung', 'Annuitätenmethode', 'Dynamisches Verfahren, das den Zeitwert des Geldes berücksichtigt; Annuitätenfaktor = i × (1 + i)ⁿ ÷ ((1 + i)ⁿ − 1).'],
+  ['Investitionsrechnung', 'Sensitivitätsanalyse', 'Umgang mit Unsicherheit: Einzelne Parameter werden variiert, um die kritischen Einflussgrößen einer Investition zu erkennen. Ergänzend: Best- und Worst-Case-Szenarien, mehrere Verfahren parallel, Nutzwertanalyse für qualitative Faktoren.'],
+  ['Investitionsarten', 'Sach-, Finanz- und immaterielle Investitionen', 'Einteilung nach dem Objekt:\nSachinvestitionen (Grundstücke, Maschinen, Vorräte)\nFinanzinvestitionen (Aktien, Anleihen, Beteiligungen)\nImmaterielle Investitionen (Personalentwicklung, F&E, Marketing; Rückfluss nicht direkt messbar).'],
+  ['Investitionsarten', 'Netto-, Re- und Bruttoinvestitionen', 'Nettoinvestitionen (erstmalig): Gründungs- und Erweiterungsinvestitionen.\nReinvestitionen: z. B. Ersatz-, Rationalisierungs-, Umstellungs-, Diversifizierungsinvestitionen.\nBruttoinvestitionen = Nettoinvestitionen + Reinvestitionen.'],
+  ['Investitionsarten', 'Ersatz-, Rationalisierungs- und Erweiterungsinvestition', 'Ersatzinvestition: gleiche Art und Technik.\nRationalisierungsinvestition: verbesserte Technik, ersetzt Arbeit durch Kapital (Fixkosten steigen, variable Kosten sinken).\nErweiterungsinvestition: zusätzliche Kapazität.\nDiversifizierung: neues Fertigungsprogramm.'],
+]));
