@@ -190,7 +190,8 @@ const Vorlesen = (() => {
 })();
 
 // ---- Einfach erklärt (KI schreibt die Lösung in einfacher Sprache) ----
-const EINFACH_KEY = 'tbw-einfach-v1';
+const EINFACH_KEY = 'tbw-einfach-v2'; // v2 = kurze Erklärungen
+try { localStorage.removeItem('tbw-einfach-v1'); } catch (e) { /* egal */ }
 let einfachSpeicher = {};
 try { einfachSpeicher = JSON.parse(localStorage.getItem(EINFACH_KEY)) || {}; } catch (e) { /* egal */ }
 const einfachLaeuft = new Set();

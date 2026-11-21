@@ -68,7 +68,7 @@ Deno.serve(async (req) => {
     // Fehlt die Tabelle, läuft alles trotzdem – nur ohne Zwischenspeicher.
     const url = Deno.env.get('SUPABASE_URL');
     const dienst = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
-    const hash = Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(frage + '\n' + muster))))
+    const hash = Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode('kurz-v2\n' + frage + '\n' + muster))))
       .map((b) => b.toString(16).padStart(2, '0')).join('');
     const db = (pfad: string, init: RequestInit = {}) => fetch(`${url}/rest/v1/${pfad}`, {
       ...init, headers: { apikey: dienst!, Authorization: `Bearer ${dienst}`, 'Content-Type': 'application/json', ...(init.headers ?? {}) },
@@ -80,14 +80,14 @@ Deno.serve(async (req) => {
       } catch { /* ohne Zwischenspeicher weiter */ }
     }
     const prompt = `Du hilfst bei der Vorbereitung auf die IHK-Prüfung "Technischer Betriebswirt".
-Erkläre den Inhalt der Musterlösung SO EINFACH WIE MÖGLICH – so, dass ein Azubi im ersten Lehrjahr oder ein Hauptschüler es sofort versteht.
+Erkläre den Kern der Musterlösung SO KURZ UND EINFACH WIE MÖGLICH – so, dass ein Hauptschüler es in 10 Sekunden versteht.
 Regeln:
-- Kurze Sätze, Alltagssprache, sprich den Lernenden mit "du" an.
-- Fachwörter nur, wenn sie für die Prüfung wichtig sind, und dann sofort in einfachen Worten erklären.
-- Ein kurzes Beispiel aus dem Alltag (z. B. Bäckerei, Handy, Taschengeld), wenn es hilft.
-- Bei Formeln oder Rechenaufgaben: Schritt für Schritt, was man rechnet und warum, mit den Zahlen aus der Aufgabe.
-- Inhaltlich nichts weglassen, was für die Prüfung wichtig ist, und nichts Falsches hinzufügen.
-- Höchstens 150 Wörter (bei Rechenaufgaben höchstens 250). Zeilenumbrüche mit \\n, keine Markdown-Zeichen wie * oder #.
+- GANZ KURZ: höchstens 3 kurze Sätze, insgesamt höchstens 40 Wörter.
+- Nur das Wichtigste, die Grundidee. Lieber Details weglassen als zu lang werden. Keine Aufzählung aller Punkte.
+- Alltagssprache, sprich den Lernenden mit "du" an. Keine Fachwörter, außer dem gefragten Begriff selbst.
+- Ein Mini-Beispiel aus dem Alltag nur, wenn es in einen halben Satz passt.
+- Bei Formeln oder Rechenaufgaben: in einem Satz sagen, was man ausrechnet, dann höchstens 3 ganz kurze Schritte (je eine Zeile). Insgesamt höchstens 60 Wörter.
+- Nichts Falsches sagen. Zeilenumbrüche mit \\n, keine Markdown-Zeichen wie * oder #.
 Antworte ausschließlich als JSON: {"erklaerung": "..."}
 
 FRAGE / BEGRIFF:
@@ -99,7 +99,7 @@ ${muster}`;
     if (fehler) return fehler;
     try {
       const e = JSON.parse(text!);
-      const erklaerung = String(e.erklaerung ?? '').replace(/\*\*/g, '').slice(0, 2500);
+      const erklaerung = String(e.erklaerung ?? '').replace(/\*\*/g, '').slice(0, 1200);
       if (!erklaerung) throw new Error('leer');
       if (dienst) {
         try {
