@@ -130,10 +130,12 @@ const Sync = (() => {
       ]);
       if (error) {
         const status = error.context && error.context.status;
-        return { fehler: status === 400 ? 'veraltet' : 'fehler' };
+        let info = status ? 'Code ' + status : error.message || '';
+        try { const d = await error.context.json(); info += ': ' + (d.fehler || '') + (d.details ? ' – ' + d.details : ''); } catch (e) { /* kein JSON */ }
+        return { fehler: status === 400 ? 'veraltet' : 'fehler', info: info.slice(0, 300) };
       }
-      return data && data.erklaerung ? data.erklaerung : { fehler: 'fehler' };
-    } catch (e) { return { fehler: 'fehler' }; }
+      return data && data.erklaerung ? data.erklaerung : { fehler: 'fehler', info: 'leere Antwort' };
+    } catch (e) { return { fehler: 'fehler', info: String(e && e.message || e).slice(0, 300) }; }
   }
 
   async function kiBewerten(frage, musterloesung, antwort, einfach) {

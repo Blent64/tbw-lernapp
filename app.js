@@ -195,6 +195,7 @@ let einfachSpeicher = {};
 try { einfachSpeicher = JSON.parse(localStorage.getItem(EINFACH_KEY)) || {}; } catch (e) { /* egal */ }
 const einfachLaeuft = new Set();
 const einfachFehler = {};
+const einfachInfo = {};
 function kurzHash(s) { let h = 5381; for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0; return (h >>> 0).toString(36); }
 function musterVon(f) {
   return f.typ === 'mc' ? 'Richtige Antwort: ' + f.optionen[f.richtig] + (f.erklaerung ? '\nErklärung: ' + f.erklaerung : '') : f.antwort;
@@ -212,7 +213,7 @@ function holeEinfach(f) {
     if (typeof r === 'string') {
       einfachSpeicher[f.id] = { h: kurzHash(musterVon(f)), text: r };
       try { localStorage.setItem(EINFACH_KEY, JSON.stringify(einfachSpeicher)); } catch (e) { /* egal */ }
-    } else einfachFehler[f.id] = r.fehler;
+    } else { einfachFehler[f.id] = r.fehler; einfachInfo[f.id] = r.info || ''; }
     if (sitzung && sitzung.warteschlange[sitzung.pos] === f.id) { const y = window.scrollY; zeigeKarte(); window.scrollTo(0, y); }
   });
 }
@@ -223,7 +224,7 @@ function einfachBlock(f) {
   if (!Sync.nutzer) return `<p class="stats klein">🧸 Für einfache Erklärungen bitte zuerst anmelden (oben rechts).</p>`;
   const fe = einfachFehler[f.id];
   if (fe === 'veraltet') return `<p class="meldung">🧸 „Einfach erklärt“ ist noch nicht fertig eingerichtet: Die KI-Funktion bei Supabase muss noch aktualisiert werden.</p>`;
-  if (fe) return `<p class="stats klein">🧸 Die einfache Erklärung hat gerade nicht geklappt. <button class="link-neutral" data-aktion="einfach-nochmal">Nochmal versuchen</button></p>`;
+  if (fe) return `<p class="stats klein">🧸 Die einfache Erklärung hat gerade nicht geklappt. <button class="link-neutral" data-aktion="einfach-nochmal">Nochmal versuchen</button>${einfachInfo[f.id] ? `<br><small>(${escText(einfachInfo[f.id])})</small>` : ''}</p>`;
   return `<div class="pruefergebnis">🧸 Die KI schreibt eine einfache Erklärung …</div>`;
 }
 // Fachliche Lösung: im Einfach-Modus eingeklappt, sobald die einfache Erklärung da ist
