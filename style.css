@@ -36,6 +36,8 @@ input { width: 100%; font: inherit; color: inherit; padding: 12px 14px; border-r
 .antwort.einfach { border-left-color: #e0a100; }
 details.fachlich { margin-top: 12px; }
 details.fachlich summary { cursor: pointer; padding: 8px 0; font-weight: 600; }
+.stimme-zeile { display: flex; gap: 10px; margin-bottom: 10px; }
+.auswahl { flex: 1; min-width: 0; font: inherit; color: inherit; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--rand); background: var(--bg); }
 .vorlesen { float: right; margin: -4px -4px 8px 10px; padding: 6px 12px; font-size: .85rem; }
 .vorlesen.aktiv { background: var(--akzent); color: var(--akzent-text); border-color: var(--akzent); }
 .begriff-hinweis { margin: 0 0 4px; font-size: .9rem; opacity: .75; }

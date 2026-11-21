@@ -139,10 +139,21 @@ const Vorlesen = (() => {
   const syn = window.speechSynthesis;
   const verfuegbar = !!syn && 'SpeechSynthesisUtterance' in window;
   let aktiv = null;
-  function stimme() {
+  const GUT = /google|premium|enhanced|natural|online|neural|siri/i;
+  let gewaehlt = '', tempo = 1;
+  try { gewaehlt = localStorage.getItem('tbw-stimme') || ''; tempo = Number(localStorage.getItem('tbw-tempo')) || 1; } catch (e) { /* egal */ }
+  // Deutsche Stimmen, die natürlich klingenden zuerst
+  function stimmen() {
+    if (!verfuegbar) return [];
     const de = syn.getVoices().filter(v => /^de/i.test(v.lang));
-    return de.find(v => /google|premium|enhanced|natural|online/i.test(v.name)) || de[0] || null;
+    return de.sort((a, b) => (GUT.test(b.name) - GUT.test(a.name)) || a.name.localeCompare(b.name));
   }
+  function stimme() {
+    const alle = stimmen();
+    return alle.find(v => v.name === gewaehlt) || alle[0] || null;
+  }
+  function waehle(name) { gewaehlt = name; try { localStorage.setItem('tbw-stimme', name); } catch (e) { /* egal */ } }
+  function setzeTempo(t) { tempo = t; try { localStorage.setItem('tbw-tempo', String(t)); } catch (e) { /* egal */ } }
   // Zeichen und Abkürzungen so umschreiben, dass sie gut vorgelesen werden
   function aufbereiten(t) {
     return t
@@ -173,7 +184,7 @@ const Vorlesen = (() => {
     const teile = stuecke(text), v = stimme();
     teile.forEach((teil, i) => {
       const u = new SpeechSynthesisUtterance(teil);
-      u.lang = 'de-DE'; if (v) u.voice = v;
+      u.lang = 'de-DE'; if (v) u.voice = v; u.rate = tempo;
       if (i === teile.length - 1) u.onend = () => { if (aktiv === ziel) { aktiv = null; knoepfe(); } };
       u.onerror = () => { if (aktiv === ziel) { aktiv = null; knoepfe(); } };
       syn.speak(u);
@@ -185,8 +196,17 @@ const Vorlesen = (() => {
     const an = aktiv === ziel;
     return `<button class="vorlesen ${an ? 'aktiv' : ''}" data-aktion="vorlesen" data-ziel="${ziel}">${an ? '⏹ Stopp' : '🔊 Vorlesen'}</button>`;
   }
-  if (verfuegbar) syn.getVoices();
-  return { verfuegbar, sprich, stopp, knopf };
+  if (verfuegbar) {
+    syn.getVoices();
+    // Stimmen kommen oft erst verzögert → Startseite neu zeichnen, damit die Auswahl vollständig ist
+    syn.addEventListener && syn.addEventListener('voiceschanged', () => { if (ansicht === zeigeStart) aktualisiereAnsicht(); });
+  }
+  return {
+    verfuegbar, sprich, stopp, knopf, stimmen, waehle, setzeTempo,
+    get stimmeName() { const v = stimme(); return v ? v.name : ''; },
+    get tempo() { return tempo; },
+    istGut: v => GUT.test(v.name),
+  };
 })();
 
 // ---- Einfach erklärt (KI schreibt die Lösung in einfacher Sprache) ----
@@ -334,11 +354,40 @@ function zeigeStart() {
     ? 'Dein Lernfortschritt wird mit deinem Konto auf allen Geräten synchronisiert.'
     : 'Dein Lernfortschritt wird nur auf diesem Gerät gespeichert.'
       + (Sync.aktiv ? ' <button class="link-neutral" data-aktion="konto">Anmelden zum Synchronisieren</button>' : '');
+  html += stimmenBereich();
   html += `<footer class="fuss">
     <p>${speicherText}</p>
     <button class="link" data-aktion="reset">Fortschritt zurücksetzen</button>
   </footer>`;
   zeige(html);
+}
+
+const PROBE_TEXT = 'Hallo! So klinge ich, wenn ich dir die Lösungen vorlese. Viel Erfolg beim Lernen!';
+function stimmenTipp() {
+  const ua = navigator.userAgent;
+  if (/iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1))
+    return 'Natürlichere Stimmen: Einstellungen → Bedienungshilfen → Gesprochene Inhalte → Stimmen → Deutsch → eine Stimme mit „Premium“ oder „Erweitert“ laden (z. B. Anna). Danach die App neu öffnen.';
+  if (/Android/.test(ua))
+    return 'Natürlichere Stimmen: Einstellungen → Text-in-Sprache-Ausgabe → Google-Sprachausgabe → Sprachdaten Deutsch installieren.';
+  if (/Edg\//.test(ua)) return 'Tipp: Die Stimmen mit „Online (Natural)“ klingen am natürlichsten.';
+  if (/Windows/.test(ua)) return 'Tipp: Am PC klingen die Stimmen im Browser Microsoft Edge viel natürlicher („Online (Natural)“). Öffne die App dafür einfach in Edge.';
+  return '';
+}
+function stimmenBereich() {
+  const st = Vorlesen.stimmen();
+  if (!st.length) return '';
+  const opts = st.map(v => `<option value="${escText(v.name)}" ${v.name === Vorlesen.stimmeName ? 'selected' : ''}>${Vorlesen.istGut(v) ? '⭐ ' : ''}${escText(v.name)}</option>`).join('');
+  const tseg = (w, t) => `<button class="seg ${Vorlesen.tempo === w ? 'aktiv' : ''}" data-aktion="tempo" data-wert="${w}" aria-pressed="${Vorlesen.tempo === w}">${t}</button>`;
+  const tipp = stimmenTipp();
+  return `<section class="pruefung">
+    <h2 class="abschnitt">🔊 Vorlese-Stimme</h2>
+    <div class="stimme-zeile">
+      <select id="stimme" class="auswahl" aria-label="Stimme">${opts}</select>
+      <button data-aktion="stimme-probe">▶ Probe</button>
+    </div>
+    <div class="segmente" role="group" aria-label="Tempo">${tseg(0.85, '🐢 Langsam')}${tseg(1, 'Normal')}${tseg(1.15, '🐇 Schnell')}</div>
+    <p class="stats klein">⭐ = klingt natürlicher.${tipp ? ' ' + escText(tipp) : ''}</p>
+  </section>`;
 }
 
 function fachKachel(fach) {
@@ -590,6 +639,10 @@ document.addEventListener('submit', async e => {
   zeigeKonto();
 });
 
+document.addEventListener('change', e => {
+  if (e.target.id === 'stimme') { Vorlesen.waehle(e.target.value); Vorlesen.sprich('probe', PROBE_TEXT); }
+});
+
 document.addEventListener('input', e => {
   if (e.target.id === 'eingabe' && sitzung) sitzung.eingabe = e.target.value;
 });
@@ -606,6 +659,13 @@ document.addEventListener('click', e => {
       const f = FRAGEN.find(x => x.id === d.ziel.replace(/^einfach-/, ''));
       const text = f && (einfach ? einfachText(f) : vorleseText(f));
       if (text) Vorlesen.sprich(d.ziel, text);
+      break;
+    }
+    case 'stimme-probe': Vorlesen.sprich('probe', PROBE_TEXT); break;
+    case 'tempo': {
+      Vorlesen.setzeTempo(Number(d.wert));
+      const y = window.scrollY; if (ansicht) ansicht(); window.scrollTo(0, y);
+      Vorlesen.sprich('probe', PROBE_TEXT);
       break;
     }
     case 'einfach-nochmal': {
