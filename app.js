@@ -280,7 +280,7 @@ function pz(teil, ganz) {
   return p > 0 && p < 10 ? p.toFixed(1).replace('.', ',').replace(/,0$/, '') : String(Math.round(p));
 }
 function statistik(liste) {
-  const sicher = liste.filter(f => box(f) >= 3).length;
+  const sicher = liste.filter(f => box(f) >= 1).length;
   const gelernt = liste.filter(f => fortschritt.karten[f.id]).length;
   return {
     gesamt: liste.length,
@@ -294,7 +294,7 @@ function statistik(liste) {
 function quoteText(s) { return `${s.beantwortet} % beantwortet · davon ${s.sicherQuote} % sicher`; }
 // Werte für die Rangliste (über alle Fächer)
 function ranglistenWerte() {
-  const sicher = FRAGEN.filter(f => box(f) >= 3).length;
+  const sicher = FRAGEN.filter(f => box(f) >= 1).length;
   const gelernt = FRAGEN.filter(f => fortschritt.karten[f.id]).length;
   return { sicher, gelernt, prozent: FRAGEN.length ? Math.round(sicher / FRAGEN.length * 100) : 0 };
 }
@@ -466,7 +466,7 @@ async function zeigeRangliste(meldung) {
     ${zeilen ? `<div class="tabelle-rahmen"><table class="rangliste">
       <thead><tr><th>#</th><th>Name</th><th>Beantwortet</th><th>Davon sicher</th></tr></thead>
       <tbody>${zeilen}</tbody></table></div>
-      <p class="stats klein">Beantwortet = Anteil aller ${FRAGEN.length} Fragen der App, die schon mindestens einmal beantwortet wurden (egal ob richtig oder falsch). Davon sicher = Anteil der beantworteten Fragen, die mindestens dreimal hintereinander richtig waren.</p>`
+      <p class="stats klein">Beantwortet = Anteil aller ${FRAGEN.length} Fragen der App, die schon mindestens einmal beantwortet wurden (egal ob richtig oder falsch). Davon sicher = Anteil der beantworteten Fragen, die beim letzten Mal richtig beantwortet wurden (falsch beantwortet = zählt wieder nicht).</p>`
     : '<p class="leer">Noch niemand in der Rangliste. Sei die erste Person!</p>'}
     <section class="pruefung">${teilnahme}
       <p class="stats klein">Sichtbar für alle angemeldeten Nutzer: nur Spitzname und die Zahlen oben. Keine E-Mail, keine einzelnen Antworten.</p>
