@@ -273,15 +273,25 @@ function passtFilter(f) {
   return (filter.form === 'alle' || f.typ === filter.form) && (filter.art === 'alle' || artVon(f) === filter.art);
 }
 function fragenVon(fach) { return FRAGEN.filter(f => f.fach === fach); }
+// Prozent: unter 10 % mit einer Nachkommastelle (z. B. „0,5“), sonst ganzzahlig
+function pz(teil, ganz) {
+  if (!ganz) return '0';
+  const p = teil / ganz * 100;
+  return p > 0 && p < 10 ? p.toFixed(1).replace('.', ',').replace(/,0$/, '') : String(Math.round(p));
+}
 function statistik(liste) {
   const sicher = liste.filter(f => box(f) >= 3).length;
+  const gelernt = liste.filter(f => fortschritt.karten[f.id]).length;
   return {
     gesamt: liste.length,
     faellig: liste.filter(istFaellig).length,
     fehler: liste.filter(istFehler).length,
-    prozent: liste.length ? Math.round(sicher / liste.length * 100) : 0,
+    beantwortet: pz(gelernt, liste.length),   // Anteil schon beantworteter Fragen
+    sicherQuote: pz(sicher, gelernt),          // davon sicher
+    balken: liste.length ? gelernt / liste.length * 100 : 0,
   };
 }
+function quoteText(s) { return `${s.beantwortet} % beantwortet · davon ${s.sicherQuote} % sicher`; }
 // Werte für die Rangliste (über alle Fächer)
 function ranglistenWerte() {
   const sicher = FRAGEN.filter(f => box(f) >= 3).length;
@@ -397,12 +407,12 @@ function fachKachel(fach) {
   const sf = statistik(gefiltert);
   const info = !s.gesamt ? 'Noch keine Fragen'
     : (filter.form === 'alle' && filter.art === 'alle')
-      ? `${s.gesamt} Fragen · ${s.faellig} fällig · ${s.prozent}% sicher`
-      : `${sf.gesamt} passend · ${sf.faellig} fällig · ${s.prozent}% sicher`;
+      ? `${s.gesamt} Fragen · ${s.faellig} fällig<br>${quoteText(s)}`
+      : `${sf.gesamt} passend · ${sf.faellig} fällig<br>${quoteText(s)}`;
   return `<button class="kachel" data-aktion="fach" data-fach="${fach}">
     <span class="kachel-titel">${esc(FAECHER[fach])}</span>
     <span class="kachel-info">${info}</span>
-    <span class="balken"><span style="width:${s.prozent}%"></span></span>
+    <span class="balken"><span style="width:${s.balken}%"></span></span>
   </button>`;
 }
 
@@ -413,7 +423,7 @@ function zeigeFach(fach) {
   const n = (bed) => alle.filter(bed).length;
   zeige(`<button class="zurueck" data-aktion="start">← Übersicht</button>
     <h1>${esc(FAECHER[fach])}</h1>
-    <p class="stats">${s.gesamt} Fragen · ${s.faellig} fällig · ${s.prozent}% sicher</p>
+    <p class="stats">${s.gesamt} Fragen · ${s.faellig} fällig · ${quoteText(s)}</p>
     ${s.gesamt ? `<p class="stats klein">🗂 ${n(f => f.typ === 'karte')} Karteikarten · ✅ ${n(f => f.typ === 'mc')} Multiple Choice · 🔤 ${n(f => f.typ === 'begriff')} Fachbegriffe ·📖 ${n(f => artVon(f) === 'theorie')} Theorie · 🧮 ${n(f => artVon(f) === 'rechnen')} Rechnen</p>
       ${filterLeiste()}
       ${lernKnoepfe(alle.filter(passtFilter), `data-fach="${fach}"`)}`
@@ -436,7 +446,7 @@ async function zeigeRangliste(meldung) {
   }
   const ich = Sync.nutzer.id;
   const zeilen = (data || []).map((r, i) => `<tr class="${r.user_id === ich ? 'ich' : ''}">
-      <td>${i + 1}.</td><td>${esc(r.name)}</td><td>${r.sicher}</td><td>${r.prozent}%</td><td>${r.gelernt}</td>
+      <td>${i + 1}.</td><td>${esc(r.name)}</td><td>${pz(r.gelernt, FRAGEN.length)} %</td><td>${pz(r.sicher, r.gelernt)} %</td>
     </tr>`).join('');
   const eintrag = Sync.ranglisteEintrag;
   const teilnahme = eintrag
@@ -454,9 +464,9 @@ async function zeigeRangliste(meldung) {
   zeige(`${kopf}
     ${meldung ? `<p class="meldung">${esc(meldung)}</p>` : ''}
     ${zeilen ? `<div class="tabelle-rahmen"><table class="rangliste">
-      <thead><tr><th>#</th><th>Name</th><th>Sicher</th><th>%</th><th>Gelernt</th></tr></thead>
+      <thead><tr><th>#</th><th>Name</th><th>Beantwortet</th><th>Davon sicher</th></tr></thead>
       <tbody>${zeilen}</tbody></table></div>
-      <p class="stats klein">Sicher = mindestens dreimal hintereinander richtig. Gelernt = schon einmal beantwortet. % bezieht sich auf alle ${FRAGEN.length} Fragen der App.</p>`
+      <p class="stats klein">Beantwortet = Anteil aller ${FRAGEN.length} Fragen der App, die schon mindestens einmal beantwortet wurden (egal ob richtig oder falsch). Davon sicher = Anteil der beantworteten Fragen, die mindestens dreimal hintereinander richtig waren.</p>`
     : '<p class="leer">Noch niemand in der Rangliste. Sei die erste Person!</p>'}
     <section class="pruefung">${teilnahme}
       <p class="stats klein">Sichtbar für alle angemeldeten Nutzer: nur Spitzname und die Zahlen oben. Keine E-Mail, keine einzelnen Antworten.</p>

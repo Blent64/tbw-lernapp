@@ -69,7 +69,7 @@ const Sync = (() => {
   }
   async function ranglisteLaden() {
     return client.from('rangliste').select('user_id,name,sicher,gelernt,prozent')
-      .order('sicher', { ascending: false }).order('gelernt', { ascending: false });
+      .order('gelernt', { ascending: false }).order('sicher', { ascending: false });
   }
 
   async function abgleichen() {
